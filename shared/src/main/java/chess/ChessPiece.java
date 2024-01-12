@@ -55,12 +55,13 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         var ret = new HashSet<ChessMove>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        ChessPosition currPos = null;
+
         if (myType == PieceType.BISHOP) {
-            int row = myPosition.getRow();
-            int col = myPosition.getColumn();
             int i = row + 1;
             int j = col + 1;
-            ChessPosition currPos = null;
 
             while (i < 9 && j < 9) {
                 currPos = new ChessPosition(i, j);
@@ -115,10 +116,6 @@ public class ChessPiece {
             }
         }
         else if (myType == PieceType.KING) {
-            int row = myPosition.getRow();
-            int col = myPosition.getColumn();
-            ChessPosition currPos = null;
-
             for (int i = -1; i < 2; ++i){
                 if (row + i < 9 && row + i > 0) {
                     for (int j = -1; j < 2; ++j) {
@@ -130,14 +127,29 @@ public class ChessPiece {
                                 if (board.getPiece(currPos).getTeamColor() != myColor) {
                                     ret.add(move);
                                 }
-                                break;
                             }
                             else { ret.add(move); }
                         }
                     }
                 }
             }
+        }
+        else if (myType == PieceType.KNIGHT) {
+            int [] rowPos = new int[]{2,2,1,1,-1,-1,-2,-2};
+            int [] colPos = new int[]{1,-1,2,-2,2,-2,1,-1};
+            for (int i = 0; i < rowPos.length; ++i) {
+                if (row + rowPos[i] > 0 && row + rowPos[i] < 9 && col + colPos[i] > 0 && col + colPos[i] < 9) {
+                    currPos = new ChessPosition(row + rowPos[i],col + colPos[i]);
+                    ChessMove move = new ChessMove(myPosition, currPos, null);
 
+                    if (board.getPiece(currPos) != null) {
+                        if (board.getPiece(currPos).getTeamColor() != myColor) {
+                            ret.add(move);
+                        }
+                    }
+                    else { ret.add(move); }
+                }
+            }
 
         }
         return ret;
