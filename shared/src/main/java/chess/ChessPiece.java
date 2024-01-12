@@ -1,6 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Collection;
 
 /**
@@ -52,7 +52,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> ret = new ArrayList<ChessMove>();
+        var ret = new HashSet<ChessMove>();
         if (myType == PieceType.BISHOP) {
             int row = myPosition.getRow();
             int col = myPosition.getColumn();
@@ -62,43 +62,81 @@ public class ChessPiece {
 
             while (i < 9 && j < 9) {
                 currPos = new ChessPosition(i, j);
-                if (board.getPiece(currPos) == null) {
-                    ChessMove move = new ChessMove(myPosition, currPos, null);
-                    ret.add(move);
+                ChessMove move = new ChessMove(myPosition, currPos, null);
+                if (board.getPiece(currPos) != null) {
+                    if (board.getPiece(currPos).getTeamColor() != myColor) {
+                        ret.add(move); // Capture move
+                    }
+                    break;
                 }
-                else { break; }
+                else { ret.add(move); }
                 ++i; ++j;
             }
             i = row - 1; j = col - 1;
             while (i > 0 && j > 0) {
                 currPos = new ChessPosition(i, j);
-                if (board.getPiece(currPos) == null) {
-                    ChessMove move = new ChessMove(myPosition, currPos, null);
-                    ret.add(move);
+                ChessMove move = new ChessMove(myPosition, currPos, null);
+                if (board.getPiece(currPos) != null) {
+                    if (board.getPiece(currPos).getTeamColor() != myColor) {
+                        ret.add(move);
+                    }
+                    break;
                 }
-                else { break; }
+                else { ret.add(move); }
                 --i; --j;
             }
             i = row + 1; j = col - 1;
             while (i < 9 && j > 0) {
                 currPos = new ChessPosition(i, j);
-                if (board.getPiece(currPos) == null) {
-                    ChessMove move = new ChessMove(myPosition, currPos, null);
-                    ret.add(move);
+                ChessMove move = new ChessMove(myPosition, currPos, null);
+                if (board.getPiece(currPos) != null) {
+                    if (board.getPiece(currPos).getTeamColor() != myColor) {
+                        ret.add(move);
+                    }
+                    break;
                 }
-                else { break; }
+                else { ret.add(move); }
                 ++i; --j;
             }
             i = row - 1; j = col + 1;
             while (i > 0 && j < 9) {
                 currPos = new ChessPosition(i, j);
-                if (board.getPiece(currPos) == null) {
-                    ChessMove move = new ChessMove(myPosition, currPos, null);
-                    ret.add(move);
+                ChessMove move = new ChessMove(myPosition, currPos, null);
+                if (board.getPiece(currPos) != null) {
+                    if (board.getPiece(currPos).getTeamColor() != myColor) {
+                        ret.add(move);
+                    }
+                    break;
                 }
-                else { break; }
+                else { ret.add(move); }
                 --i; ++j;
             }
+        }
+        else if (myType == PieceType.KING) {
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+            ChessPosition currPos = null;
+
+            for (int i = -1; i < 2; ++i){
+                if (row + i < 9 && row + i > 0) {
+                    for (int j = -1; j < 2; ++j) {
+                        if (col + j < 9 && col + j > 0) {
+                            currPos = new ChessPosition(row + i,col + j);
+                            ChessMove move = new ChessMove(myPosition, currPos, null);
+
+                            if (board.getPiece(currPos) != null) {
+                                if (board.getPiece(currPos).getTeamColor() != myColor) {
+                                    ret.add(move);
+                                }
+                                break;
+                            }
+                            else { ret.add(move); }
+                        }
+                    }
+                }
+            }
+
+
         }
         return ret;
     }

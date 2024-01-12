@@ -9,9 +9,9 @@ import java.util.HashMap;
  */
 public class ChessBoard {
 
-    HashMap<ChessPosition, ChessPiece> piecePositions;
+    ChessPiece[][] piecePositions;
     public ChessBoard() {
-        piecePositions = new HashMap<ChessPosition, ChessPiece>();
+        piecePositions = new ChessPiece[8][8];
     }
 
     /**
@@ -21,7 +21,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        piecePositions.put(position, piece);
+        piecePositions[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
     /**
@@ -32,7 +32,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return piecePositions.get(position);
+        return piecePositions[position.getRow()-1][position.getColumn()-1];
     }
 
     /**
@@ -40,25 +40,5 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        // White Rooks
-        ChessPosition currPos = new ChessPosition(1,1);
-        ChessPiece currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
-        piecePositions.put(currPos, currPiece);
-        currPos = new ChessPosition(1,8);
-        currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
-        piecePositions.put(currPos, currPiece);
-        // White Knights
-        currPos = new ChessPosition(1,2);
-        currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
-        piecePositions.put(currPos, currPiece);
-        currPos = new ChessPosition(1,7);
-        currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
-        piecePositions.put(currPos, currPiece);
-        // White Bishops
-        currPos = new ChessPosition(1, 3);
-        currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
-        piecePositions.put(currPos, currPiece);
-        
-
     }
 }
