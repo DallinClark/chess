@@ -1,4 +1,5 @@
 package chess;
+import java.util.HashMap;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -8,8 +9,9 @@ package chess;
  */
 public class ChessBoard {
 
+    HashMap<ChessPosition, ChessPiece> piecePositions;
     public ChessBoard() {
-        
+        piecePositions = new HashMap<ChessPosition, ChessPiece>();
     }
 
     /**
@@ -19,7 +21,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        piecePositions.put(position, piece);
     }
 
     /**
@@ -30,7 +32,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        return piecePositions.get(position);
     }
 
     /**
@@ -38,6 +40,25 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        // White Rooks
+        ChessPosition currPos = new ChessPosition(1,1);
+        ChessPiece currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        piecePositions.put(currPos, currPiece);
+        currPos = new ChessPosition(1,8);
+        currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        piecePositions.put(currPos, currPiece);
+        // White Knights
+        currPos = new ChessPosition(1,2);
+        currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+        piecePositions.put(currPos, currPiece);
+        currPos = new ChessPosition(1,7);
+        currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+        piecePositions.put(currPos, currPiece);
+        // White Bishops
+        currPos = new ChessPosition(1, 3);
+        currPiece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+        piecePositions.put(currPos, currPiece);
+        
+
     }
 }
