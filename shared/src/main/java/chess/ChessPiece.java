@@ -281,6 +281,46 @@ public class ChessPiece {
         return ret;
     }
 
+    public String toString() {
+        if (myType == PieceType.KING) {
+            if (myColor == ChessGame.TeamColor.WHITE) {
+                return "K";
+            }
+            return "k";
+        }
+        if (myType == PieceType.QUEEN) {
+            if (myColor == ChessGame.TeamColor.WHITE) {
+                return "Q";
+            }
+            return "q";
+        }
+        if (myType == PieceType.BISHOP) {
+            if (myColor == ChessGame.TeamColor.WHITE) {
+                return "B";
+            }
+            return "b";
+        }
+        if (myType == PieceType.KNIGHT) {
+            if (myColor == ChessGame.TeamColor.WHITE) {
+                return "H";
+            }
+            return "h";
+        }
+        if (myType == PieceType.ROOK) {
+            if (myColor == ChessGame.TeamColor.WHITE) {
+                return "R";
+            }
+            return "r";
+        }
+        if (myType == PieceType.PAWN) {
+            if (myColor == ChessGame.TeamColor.WHITE) {
+                return "P";
+            }
+            return "p";
+        }
+        return "n/a";
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
