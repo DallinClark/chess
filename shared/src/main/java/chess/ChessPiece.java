@@ -252,6 +252,32 @@ public class ChessPiece {
                 }
             }
         }
+        else if (myType == PieceType.ROOK) {
+            int [] rowMoves = new int[] {-1,1,0,0};
+            int [] colMoves = new int[] {0,0,-1,1};
+            ChessMove move;
+
+            for (int i = 0; i < rowMoves.length; ++i) {
+                int myRow = row + rowMoves[i];
+                int myCol = col + colMoves[i];
+
+                while (myRow < 9 && myRow > 0 && myCol < 9 && myCol > 0) {
+                    currPos = new ChessPosition(myRow, myCol);
+                    if (board.getPiece(currPos) == null) {
+                        move = new ChessMove(myPosition, currPos, null);
+                        ret.add(move);
+                    } else {
+                        if (board.getPiece(currPos).getTeamColor() != myColor) {
+                            move = new ChessMove(myPosition, currPos, null);
+                            ret.add(move);
+                        }
+                        break;
+                    }
+                    myRow += rowMoves[i];
+                    myCol += colMoves[i];
+                }
+            }
+        }
         return ret;
     }
 
