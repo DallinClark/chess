@@ -85,7 +85,8 @@ public class ChessGame {
             oppTeam = TeamColor.WHITE;
         }
         for (ChessPiece piece : board.getPieces(oppTeam)) {
-            for (ChessMove move : piece.pieceMoves(board, board.getPosition(piece))) {
+            ChessPosition piecePos = board.getPosition(piece);
+            for (ChessMove move : piece.pieceMoves(board, piecePos)) {
                 if (move.getEndPosition().equals(kingPos)) {
                     return true;
                 }

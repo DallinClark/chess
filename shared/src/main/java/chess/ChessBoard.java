@@ -17,7 +17,6 @@ public class ChessBoard {
     public ChessBoard() {
         piecePositions = new ChessPiece[8][8];
         piecePositionMap = new HashMap<>();
-        resetBoard();
     }
 
     /**

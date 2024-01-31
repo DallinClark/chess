@@ -12,12 +12,17 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPiece {
+
+    private static int nextId = 0; // Static counter for unique IDs
+    private final int id; // Unique ID for each piece
     PieceType myType;
     ChessGame.TeamColor myColor;
+
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         myType = type;
         myColor = pieceColor;
+        this.id = nextId++;
     }
 
     /**
@@ -45,7 +50,6 @@ public class ChessPiece {
     public PieceType getPieceType() {
         return myType;
     }
-
 
     /**
      * Calculates all the positions a chess piece can move to
@@ -327,11 +331,11 @@ public class ChessPiece {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessPiece that = (ChessPiece) o;
-        return myType == that.myType && myColor == that.myColor;
+        return id == that.id && myType == that.myType && myColor == that.myColor;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(myType, myColor);
+        return Objects.hash(id, myType, myColor);
     }
 }
