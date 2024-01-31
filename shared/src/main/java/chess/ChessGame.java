@@ -47,9 +47,14 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+
         ChessPiece piece = board.getPiece(startPosition);
         TeamColor team = piece.getTeamColor();
-        List<ChessMove> validMoves = new ArrayList<>();;
+        List<ChessMove> validMoves = new ArrayList<>();
+
+        if (team != teamTurn) {
+            return validMoves;
+        }
 
         for (ChessMove move : piece.pieceMoves(board,startPosition)) {
             ChessPiece pieceAtEndPos = board.getPiece(move.getEndPosition());
@@ -81,6 +86,12 @@ public class ChessGame {
         for (ChessMove currMove : validMoves(move.getStartPosition())) {
             if (move.equals(currMove)) {
                 board.movePiece(move);
+                if (teamTurn == TeamColor.WHITE) {
+                    teamTurn = TeamColor.BLACK;
+                }
+                else {
+                    teamTurn = TeamColor.WHITE;
+                }
                 return;
             }
         }
