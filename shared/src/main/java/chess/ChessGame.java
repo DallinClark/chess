@@ -1,7 +1,10 @@
 package chess;
 
 import java.util.Collection;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 /**
  * For a class that can manage a chess game, making moves on a board
  * <p>
@@ -74,15 +77,21 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         TeamColor oppTeam;
+        ChessPosition kingPos = board.getKingPosition(teamColor);
         if (teamColor == TeamColor.WHITE) {
             oppTeam = TeamColor.BLACK;
         }
         else {
             oppTeam = TeamColor.WHITE;
         }
-        for (int i = 0; i < board.getNumPieces(oppTeam); ++i) {
-
+        for (ChessPiece piece : board.getPieces(oppTeam)) {
+            for (ChessMove move : piece.pieceMoves(board, board.getPosition(piece))) {
+                if (move.getEndPosition() == kingPos) {
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     /**
