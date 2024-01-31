@@ -1,10 +1,7 @@
 package chess;
 
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+
 /**
  * For a class that can manage a chess game, making moves on a board
  * <p>
@@ -51,12 +48,25 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece != null) {
-            return piece.pieceMoves(board, startPosition);
+        TeamColor team = piece.getTeamColor();
+        List<ChessMove> validMoves = new ArrayList<>();;
+
+        for (ChessMove move : piece.pieceMoves(board,startPosition)) {
+            ChessPiece pieceAtEndPos = board.getPiece(move.getEndPosition());
+
+            board.movePiece(move);
+            if (!isInCheck(team)) {
+                validMoves.add(move);
+            }
+
+
+            ChessMove reverseMove = new ChessMove(move.getEndPosition(), move.getStartPosition(), null);
+            board.movePiece(reverseMove);
+            if (pieceAtEndPos != null) {
+                board.addPiece(move.getEndPosition(), pieceAtEndPos);
+            }
         }
-        else {
-            return null;
-        }
+        return validMoves;
     }
 
     /**
@@ -66,8 +76,9 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        for (ChessMove validMove : board.getPiece(move.getStartPosition()).pieceMoves(board, move.getStartPosition())) {
-            if (move.equals(validMove)) {
+
+        for (ChessMove currMove : validMoves(move.getStartPosition())) {
+            if (move.equals(currMove)) {
                 board.movePiece(move);
                 return;
             }
@@ -110,41 +121,35 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         ChessPiece kingPiece = board.getKingPiece(teamColor);
         ChessPosition kingPos = board.getPosition(kingPiece);
-        try {
-            if (isInCheck(teamColor)) {
-                for (ChessMove move : kingPiece.pieceMoves(board, kingPos)) {
-                    ChessPiece pieceAtEndPos = board.getPiece(move.getEndPosition());
 
-                    // Try the move
-                    makeMove(move);
-                    if (!isInCheck(teamColor)) {
-                        // If the king is not in check after the move, it's not checkmate
-                        // Revert the move and return false
-                        ChessMove reverseMove = new ChessMove(move.getEndPosition(), move.getStartPosition(), null);
-                        makeMove(reverseMove);
-                        if (pieceAtEndPos != null) {
-                            board.addPiece(move.getEndPosition(), pieceAtEndPos);
-                        }
-                        return false;
-                    }
+        if (isInCheck(teamColor)) {
+            for (ChessMove move : kingPiece.pieceMoves(board, kingPos)) {
+                ChessPiece pieceAtEndPos = board.getPiece(move.getEndPosition());
 
-                    // Revert the move
+                // Try the move
+                board.movePiece(move);
+                if (!isInCheck(teamColor)) {
+                    // If the king is not in check after the move, it's not checkmate
+                    // Revert the move and return false
                     ChessMove reverseMove = new ChessMove(move.getEndPosition(), move.getStartPosition(), null);
-                    makeMove(reverseMove);
+                    board.movePiece(reverseMove);
                     if (pieceAtEndPos != null) {
                         board.addPiece(move.getEndPosition(), pieceAtEndPos);
                     }
+                    return false;
                 }
-                return true; // No moves take the king out of check, so it's checkmate
-            } else {
-                return false; // Not in check, so not checkmate
+
+                // Revert the move
+                ChessMove reverseMove = new ChessMove(move.getEndPosition(), move.getStartPosition(), null);
+                board.movePiece(reverseMove);
+                if (pieceAtEndPos != null) {
+                    board.addPiece(move.getEndPosition(), pieceAtEndPos);
+                }
             }
-        } catch (InvalidMoveException e) {
-            // Handle the exception here
-            System.out.println(e.getMessage());
-            // Needs Additional logic to handle invalid move, like prompting user for a new move
+            return true; // No moves take the king out of check, so it's checkmate
+        } else {
+            return false; // Not in check, so not checkmate
         }
-        return false; // placeholder
     }
 
 
@@ -206,5 +211,18 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessGame chessGame = (ChessGame) o;
+        return getTeamTurn() == chessGame.getTeamTurn() && Objects.equals(getBoard(), chessGame.getBoard());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTeamTurn(), getBoard());
     }
 }

@@ -160,13 +160,13 @@ public class ChessBoard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessBoard that = (ChessBoard) o;
-        return Arrays.equals(piecePositions, that.piecePositions) && Objects.equals(piecePositionMap, that.piecePositionMap);
+        return Arrays.deepEquals(piecePositions, that.piecePositions) && Objects.equals(piecePositionMap, that.piecePositionMap);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(piecePositionMap);
-        result = 31 * result + Arrays.hashCode(piecePositions);
+        result = 31 * result + Arrays.deepHashCode(piecePositions);
         return result;
     }
 }
