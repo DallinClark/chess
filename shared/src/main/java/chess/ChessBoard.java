@@ -13,6 +13,7 @@ public class ChessBoard {
     ChessPiece[][] piecePositions;
     public ChessBoard() {
         piecePositions = new ChessPiece[8][8];
+        resetBoard();
     }
 
     /**
@@ -34,6 +35,18 @@ public class ChessBoard {
      */
     public ChessPiece getPiece(ChessPosition position) {
         return piecePositions[position.getRow()-1][position.getColumn()-1];
+    }
+
+    public int getNumPieces(ChessGame.TeamColor team) {
+        int count = 0;
+        for (ChessPiece[] piecePosition : piecePositions) {
+            for (ChessPiece chessPiece : piecePosition) {
+                if (chessPiece != null && chessPiece.getTeamColor() == team) {
+                    ++count;
+                }
+            }
+        }
+        return count;
     }
 
     @Override
