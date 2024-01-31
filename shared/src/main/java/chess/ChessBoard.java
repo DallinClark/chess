@@ -31,6 +31,19 @@ public class ChessBoard {
         piecePositionMap.put(piece, position);
     }
 
+    public void movePiece(ChessMove move) {
+        ChessPosition startPos = move.getStartPosition();
+        ChessPosition endPos = move.getEndPosition();
+        ChessPiece piece = getPiece(startPos);
+        if (piecePositions[endPos.getRow() - 1][endPos.getColumn() - 1] != null) {
+            piecePositionMap.remove(getPiece(endPos));
+        }
+        piecePositionMap.remove(piece);
+        piecePositionMap.put(piece, endPos);
+        piecePositions[startPos.getRow() - 1][startPos.getColumn() - 1] = null;
+        piecePositions[endPos.getRow() - 1][endPos.getColumn() - 1] = piece;
+    }
+
     public ChessPosition getPosition(ChessPiece piece) {
         return piecePositionMap.get(piece);
     }
@@ -38,12 +51,23 @@ public class ChessBoard {
     public ChessPosition getKingPosition(ChessGame.TeamColor team) {
         for (Map.Entry<ChessPiece, ChessPosition> entry : piecePositionMap.entrySet()) {
             ChessPiece piece = entry.getKey();
-            if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == team) {
+            if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == team) {
                 return entry.getValue();
             }
         }
         return null;
     }
+
+    public ChessPiece getKingPiece(ChessGame.TeamColor team) {
+        for (Map.Entry<ChessPiece, ChessPosition> entry : piecePositionMap.entrySet()) {
+            ChessPiece piece = entry.getKey();
+            if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == team) {
+                return piece;
+            }
+        }
+        return null;
+    }
+
 
     public void removePiece(ChessPosition position) {
         ChessPiece piece = piecePositions[position.getRow() - 1][position.getColumn() - 1];
@@ -61,6 +85,7 @@ public class ChessBoard {
     public ChessPiece getPiece(ChessPosition position) {
         return piecePositions[position.getRow()-1][position.getColumn()-1];
     }
+
 
     public List<ChessPiece> getPieces(ChessGame.TeamColor team) {
         List<ChessPiece> teamPieces = new ArrayList<>();

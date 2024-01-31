@@ -101,8 +101,40 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece kingPiece = board.getKingPiece(teamColor);
+        ChessPosition kingPos = board.getPosition(kingPiece);
+
+        if (isInCheck(teamColor)) {
+            for (ChessMove move : kingPiece.pieceMoves(board, kingPos)) {
+                ChessPiece pieceAtEndPos = board.getPiece(move.getEndPosition());
+
+                // Try the move
+                board.movePiece(move);
+                if (!isInCheck(teamColor)) {
+                    // If the king is not in check after the move, it's not checkmate
+                    // Revert the move and return false
+                    ChessMove reverseMove = new ChessMove(move.getEndPosition(), move.getStartPosition(), null);
+                    board.movePiece(reverseMove);
+                    if (pieceAtEndPos != null) {
+                        board.addPiece(move.getEndPosition(), pieceAtEndPos);
+                    }
+                    return false;
+                }
+
+                // Revert the move
+                ChessMove reverseMove = new ChessMove(move.getEndPosition(), move.getStartPosition(), null);
+                board.movePiece(reverseMove);
+                if (pieceAtEndPos != null) {
+                    board.addPiece(move.getEndPosition(), pieceAtEndPos);
+                }
+            }
+            return true; // No moves take the king out of check, so it's checkmate
+        } else {
+            return false; // Not in check, so not checkmate
+        }
     }
+
+
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having
@@ -118,7 +150,7 @@ public class ChessGame {
     /**
      * Sets this game's chessboard with a given board
      *
-     * @param board the new board to use
+     * @param newBoard the new board to use
      */
     public void setBoard(ChessBoard newBoard) {
         board = newBoard;

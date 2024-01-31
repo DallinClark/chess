@@ -46,6 +46,7 @@ public class ChessPiece {
         return myType;
     }
 
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
