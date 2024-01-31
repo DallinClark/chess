@@ -86,7 +86,7 @@ public class ChessGame {
         }
         for (ChessPiece piece : board.getPieces(oppTeam)) {
             for (ChessMove move : piece.pieceMoves(board, board.getPosition(piece))) {
-                if (move.getEndPosition() == kingPos) {
+                if (move.getEndPosition().equals(kingPos)) {
                     return true;
                 }
             }
@@ -120,8 +120,8 @@ public class ChessGame {
      *
      * @param board the new board to use
      */
-    public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+    public void setBoard(ChessBoard newBoard) {
+        board = newBoard;
     }
 
     /**
