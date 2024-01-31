@@ -160,13 +160,35 @@ public class ChessBoard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessBoard that = (ChessBoard) o;
-        return Arrays.deepEquals(piecePositions, that.piecePositions) && Objects.equals(piecePositionMap, that.piecePositionMap);
+
+        for (int i = 0; i < piecePositions.length; i++) {
+            for (int j = 0; j < piecePositions[i].length; j++) {
+                ChessPiece thisPiece = piecePositions[i][j];
+                ChessPiece thatPiece = that.piecePositions[i][j];
+                if (thisPiece == null && thatPiece == null) {
+                    continue; // Both positions are empty, so they are equal
+                }
+                if (thisPiece == null || thatPiece == null) {
+                    return false; // One is null and the other isn't, so they are not equal
+                }
+                if (thisPiece.getPieceType() != thatPiece.getPieceType() ||
+                        thisPiece.getTeamColor() != thatPiece.getTeamColor()) {
+                    return false; // Different type or color
+                }
+            }
+        }
+        return true; // All pieces match in type and color
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(piecePositionMap);
-        result = 31 * result + Arrays.deepHashCode(piecePositions);
+        int result = 1;
+        for (ChessPiece[] row : piecePositions) {
+            for (ChessPiece piece : row) {
+                result = 31 * result + (piece == null ? 0 : piece.hashCode());
+            }
+        }
         return result;
     }
+
 }

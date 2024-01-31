@@ -65,6 +65,7 @@ public class ChessGame {
             if (pieceAtEndPos != null) {
                 board.addPiece(move.getEndPosition(), pieceAtEndPos);
             }
+
         }
         return validMoves;
     }
