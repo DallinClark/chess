@@ -326,6 +326,11 @@ public class ChessPiece {
         return "n/a";
     }
 
+    public void changeType(PieceType type) {
+        myType = type;
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

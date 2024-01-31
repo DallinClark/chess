@@ -28,6 +28,9 @@ public class ChessBoard {
     }
 
     public void movePiece(ChessMove move) {
+        if (move.getPromotionPiece() != null) {
+            getPiece(move.getStartPosition()).changeType(move.getPromotionPiece());
+        }
         ChessPosition startPos = move.getStartPosition();
         ChessPosition endPos = move.getEndPosition();
         ChessPiece piece = getPiece(startPos);
