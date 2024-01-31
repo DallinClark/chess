@@ -1,9 +1,6 @@
 package chess;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -98,19 +95,6 @@ public class ChessBoard {
         return teamPieces;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChessBoard that = (ChessBoard) o;
-        return Arrays.deepEquals(piecePositions, that.piecePositions);
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.deepHashCode(piecePositions);
-    }
-
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
@@ -169,5 +153,20 @@ public class ChessBoard {
             out.append("\n");
         }
         return out.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessBoard that = (ChessBoard) o;
+        return Arrays.equals(piecePositions, that.piecePositions) && Objects.equals(piecePositionMap, that.piecePositionMap);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(piecePositionMap);
+        result = 31 * result + Arrays.hashCode(piecePositions);
+        return result;
     }
 }
