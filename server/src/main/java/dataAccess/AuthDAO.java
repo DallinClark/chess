@@ -11,4 +11,6 @@ public interface AuthDAO {
 
     boolean logout(String authToken) throws DataAccessException;
 
+    void authenticate(String authToken) throws DataAccessException;
+
 }

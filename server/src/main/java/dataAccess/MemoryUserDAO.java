@@ -34,6 +34,7 @@ public class MemoryUserDAO implements UserDAO{
         return false;
     }
 
+
     public boolean getPassword(UserData user) throws DataAccessException {
         for (UserData compareUser : userArray) {
             if (compareUser.username().equals(user.username()) & compareUser.password().equals(user.password())) {

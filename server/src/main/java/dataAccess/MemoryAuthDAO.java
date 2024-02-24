@@ -28,4 +28,14 @@ public class MemoryAuthDAO implements AuthDAO{
         }
         return false;
     }
+
+    @Override
+    public void authenticate(String authToken) throws DataAccessException {
+        for (AuthData data : dataArray) {
+            if (data.authToken().equals(authToken)) {
+                return;
+            }
+        }
+        throw new DataAccessException("not valid token");
+    }
 }

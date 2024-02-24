@@ -13,8 +13,6 @@ public interface UserDAO {
 
     boolean getUser(UserData user) throws DataAccessException;
 
-    AuthData login(UserData user) throws DataAccessException;
-
     boolean getPassword(UserData user) throws DataAccessException;
 
 }

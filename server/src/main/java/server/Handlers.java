@@ -1,10 +1,12 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
 import dataAccess.UserDAO;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import service.AuthService;
 import service.GameService;
@@ -62,7 +64,17 @@ public class Handlers {
         return "called";
     }
     public String createGame(Request req, Response res) {
-        return "called";
+        try {
+            var gameName = new Gson().fromJson(req.body(), GameData.class);
+            String authToken = req.headers("authToken");
+            authService.authenticate(authToken);
+            int gameID = gameService.createGame(gameName);
+            res.status(200);
+            return new Gson().toJson(gameID);
+        } catch (Exception e) {
+            res.status(500); // Internal Server Error
+            return "{\"message\": \"Error: Internal Server Error\"}";
+        }
     }
     public String listGames(Request req, Response res) {
         return "called";

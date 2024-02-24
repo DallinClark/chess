@@ -25,5 +25,9 @@ public class AuthService {
         }
     }
 
+    public void authenticate(String authToken) throws DataAccessException {
+        authDAO.authenticate(authToken);
+    }
+
     // Other methods of AuthService that use authDAO, gameDAO, and userDAO
 }

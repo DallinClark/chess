@@ -1,9 +1,11 @@
 package service;
 
+import chess.ChessGame;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import dataAccess.UserDAO;
+import model.GameData;
 
 public class GameService {
     private final GameDAO gameDAO;
@@ -20,6 +22,11 @@ public class GameService {
         gameDAO.clearGames();
         userDAO.clearUsers();
         authDAO.clearTokens();
+    }
+
+    public int createGame(GameData game) throws DataAccessException{
+        int gameID = gameDAO.newGame(game);
+        return gameID;
     }
 
     // Other methods of GameService that use gameDAO, userDAO, and authDAO
