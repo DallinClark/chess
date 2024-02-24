@@ -15,5 +15,11 @@ public class GameService {
         this.authDAO = authDAO;
     }
 
+    public void clearGames() {
+        gameDAO.clearGames();
+        userDAO.clearUsers();
+        authDAO.clearTokens();
+    }
+
     // Other methods of GameService that use gameDAO, userDAO, and authDAO
 }
