@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
 import dataAccess.UserDAO;
+import model.UserData;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -18,17 +19,21 @@ public class Handlers {
     public GameDAO gameDAO;
     public UserDAO userDAO;
 
-    private final Gson gson;
-
     public Handlers() {
         this.userService = new UserService(authDAO,gameDAO,userDAO);
         this.authService = new AuthService(authDAO,gameDAO,userDAO);
         this.gameService = new GameService(authDAO,gameDAO,userDAO);
-        this.gson = new Gson();
     }
 
-    public String registerUser(Request req, Response res) {
-        return "called";
+    public String registerUser(Request req, Response res)  {
+        try {
+            var user = new Gson().fromJson(req.body(), UserData.class);
+            String authToken = userService.registerUser(user);
+            return new Gson().toJson(authToken);
+        } catch (Exception e) {
+            res.status(500); // Internal Server Error
+            return "{\"message\": \"Error: Internal Server Error\"}";
+        }
     }
     public String login(Request req, Response res) {
         return "called";

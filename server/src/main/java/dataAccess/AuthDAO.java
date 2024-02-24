@@ -4,14 +4,9 @@ import model.AuthData;
 
 import java.util.ArrayList;
 
-public class AuthDAO {
-    ArrayList<AuthData> dataArray;
+public interface AuthDAO {
+    void clearTokens() throws DataAccessException;
 
-    public AuthDAO () {
-        dataArray = new ArrayList<>();
-    }
+    void addData(String authToken, String username) throws DataAccessException;
 
-    public void clearTokens() {
-        dataArray.clear();
-    }
 }

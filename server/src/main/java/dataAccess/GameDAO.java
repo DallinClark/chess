@@ -4,14 +4,7 @@ import model.GameData;
 
 import java.util.ArrayList;
 
-public class GameDAO {
-    ArrayList<GameData> dataArray;
+public interface GameDAO {
+    void clearGames() throws DataAccessException;
 
-    public GameDAO () {
-        dataArray = new ArrayList<>();
-    }
-
-    public void clearGames() {
-        dataArray.clear();
-    }
 }

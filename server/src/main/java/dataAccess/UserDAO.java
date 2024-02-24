@@ -2,16 +2,14 @@ package dataAccess;
 
 import model.UserData;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 
-public class UserDAO {
-    ArrayList<UserData> dataArray;
+public interface UserDAO {
+    void clearUsers() throws DataAccessException;
 
-    public UserDAO () {
-        dataArray = new ArrayList<>();
-    }
+    String newUser(UserData user) throws DataAccessException;
 
-    public void clearUsers() {
-        dataArray.clear();
-    }
+    boolean getUser(UserData user) throws DataAccessException;
+
 }
