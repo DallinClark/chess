@@ -7,13 +7,20 @@ import spark.Response;
 
 public class UserHandlers {
     private final UserService userService; // Assume UserService is a class that handles business logic.
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
-    public UserHandlers(UserService userService) {
-        this.userService = userService;
+    public UserHandlers() {
+        this.userService = new UserService();
+        this.gson = new Gson();
     }
 
-    public String createUser(Request req, Response res) {
+    public String registerUser(Request req, Response res) {
         return "called";
     }
+    public String login(Request req, Response res) {
+        return "called";
     }
+    public String logout(Request req, Response res) {
+        return "called";
+    }
+}

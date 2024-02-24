@@ -10,60 +10,30 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        UserService userService = new UserService();
-        UserHandlers userHandler = new UserHandlers(userService);
+        UserHandlers userHandler = new UserHandlers();
+        GameHandlers gameHandler = new GameHandlers();
 
 
+        //registering the handlers
+        Spark.post("/user", userHandler::registerUser);
 
-        // Register your endpoints and handle exceptions here.
-        registerEndpoints();
+        Spark.post("/session", userHandler::login);
+
+        Spark.delete("/session", userHandler::logout);
+
+        Spark.get("/game", gameHandler::listGames);
+
+        Spark.post("/game", gameHandler::createGame);
+
+        Spark.put("/game", gameHandler::joinGame);
+
+        Spark.delete("/db", gameHandler::clear);
+
 
         Spark.awaitInitialization();
         return Spark.port();
     }
 
-    private void registerEndpoints() {
-        Spark.delete("/db", (req, res) -> {
-            // Logic to clear the database
-            return "Database cleared";
-        });
-
-        // Register
-        Spark.post("/user", (req, res) -> {
-            // Logic to register a new user
-            return "User registered";
-        });
-
-        // Login
-        Spark.post("/session", (req, res) -> {
-            // Logic to log in a user
-            return "User logged in";
-        });
-
-        // Logout
-        Spark.delete("/session", (req, res) -> {
-            // Logic to log out a user
-            return "User logged out";
-        });
-
-        // List Games
-        Spark.get("/game", (req, res) -> {
-            // Logic to list all games
-            return "List of games";
-        });
-
-        // Create Game
-        Spark.post("/game", (req, res) -> {
-            // Logic to create a new game
-            return "Game created";
-        });
-
-        // Join Game
-        Spark.put("/game", (req, res) -> {
-            // Logic for a user to join a game
-            return "Joined game";
-        });
-    }
 
 
     public void stop() {
