@@ -15,4 +15,6 @@ public interface UserDAO {
 
     boolean getPassword(UserData user) throws DataAccessException;
 
+    String getMyName() throws DataAccessException;
+
 }

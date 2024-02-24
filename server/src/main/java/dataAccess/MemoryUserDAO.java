@@ -10,10 +10,12 @@ import java.util.UUID;
 public class MemoryUserDAO implements UserDAO{
 
     ArrayList<UserData> userArray = new ArrayList<>();
+    String myName = "";
 
     @Override
     public void clearUsers() throws DataAccessException {
         userArray.clear();
+        myName = "";
     }
 
     @Override
@@ -21,6 +23,7 @@ public class MemoryUserDAO implements UserDAO{
         userArray.add(user);
         UUID uuid = UUID.randomUUID();
         String authToken = uuid.toString();
+        myName = user.username();
         return new AuthData(authToken,user.username());
     }
 
@@ -42,5 +45,10 @@ public class MemoryUserDAO implements UserDAO{
             }
         }
         return false;
+    }
+
+    @Override
+    public String getMyName() throws DataAccessException {
+        return myName;
     }
 }

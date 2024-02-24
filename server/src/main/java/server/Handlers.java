@@ -8,6 +8,7 @@ import dataAccess.UserDAO;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import model.gameJoinerData;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -61,7 +62,17 @@ public class Handlers {
     }
 
     public String joinGame(Request req, Response res) {
-        return "called";
+        try {
+            var game = new Gson().fromJson(req.body(), gameJoinerData.class);
+            String authToken = req.headers("authToken");
+            authService.authenticate(authToken);
+            gameService.joinGame(game);
+            res.status(200);
+            return null;
+        } catch (Exception e) {
+            res.status(500); // Internal Server Error
+            return "{\"message\": \"Error: Internal Server Error\"}";
+        }
     }
     public String createGame(Request req, Response res) {
         try {
@@ -77,7 +88,16 @@ public class Handlers {
         }
     }
     public String listGames(Request req, Response res) {
-        return "called";
+        try {
+            String authToken = req.headers("authToken");
+            authService.authenticate(authToken);
+            GameData[] games = gameService.listGames();
+            res.status(200);
+            return new Gson().toJson(games);
+        } catch (Exception e) {
+            res.status(500); // Internal Server Error
+            return "{\"message\": \"Error: Internal Server Error\"}";
+        }
     }
     public String clear(Request req, Response res) {
         try {
