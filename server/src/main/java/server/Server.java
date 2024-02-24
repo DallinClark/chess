@@ -1,6 +1,5 @@
 package server;
 
-import service.UserService;
 import spark.*;
 
 public class Server {
@@ -10,24 +9,23 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        UserHandlers userHandler = new UserHandlers();
-        GameHandlers gameHandler = new GameHandlers();
+        Handlers handlers = new Handlers();
 
 
         //registering the handlers
-        Spark.post("/user", userHandler::registerUser);
+        Spark.post("/user", handlers::registerUser);
 
-        Spark.post("/session", userHandler::login);
+        Spark.post("/session", handlers::login);
 
-        Spark.delete("/session", userHandler::logout);
+        Spark.delete("/session", handlers::logout);
 
-        Spark.get("/game", gameHandler::listGames);
+        Spark.get("/game", handlers::listGames);
 
-        Spark.post("/game", gameHandler::createGame);
+        Spark.post("/game", handlers::createGame);
 
-        Spark.put("/game", gameHandler::joinGame);
+        Spark.put("/game", handlers::joinGame);
 
-        Spark.delete("/db", gameHandler::clear);
+        Spark.delete("/db", handlers::clear);
 
 
         Spark.awaitInitialization();
