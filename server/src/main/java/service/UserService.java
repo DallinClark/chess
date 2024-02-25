@@ -1,47 +1,26 @@
 package service;
 
-import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
-import dataAccess.GameDAO;
-import dataAccess.UserDAO;
+import dataAccess.*;
 import model.AuthData;
 import model.UserData;
 
 public class UserService {
-    private final UserDAO userDAO;
-    private final GameDAO gameDAO;
-    private final AuthDAO authDAO;
-
-    public UserService(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO) {
-        this.userDAO = userDAO;
-        this.gameDAO = gameDAO;
-        this.authDAO = authDAO;
+    private final DataAccess dataAccess;
+    public UserService(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
     }
-
     public AuthData registerUser(UserData user) throws DataAccessException {
-        if (!userDAO.getUser(user)) {
-            AuthData data = userDAO.newUser(user);
-            authDAO.addData(data);
-            return data;
-        }
-        else {
-            throw new DataAccessException("user already exists");
-        }
+        dataAccess.checkUsername(user.username());
+        dataAccess.createUser(user);
+        return dataAccess.createAuth(user.username());
     }
 
     public AuthData login(UserData user) throws DataAccessException {
-        if (userDAO.getUser(user)) {
-            if (userDAO.getPassword(user)) {
-                AuthData data = userDAO.newUser(user);
-                authDAO.addData(data);
-                return data;
-            }
-            else {
-                throw new DataAccessException("wrong password");
-            }
-        }
-        else {
-            throw new DataAccessException("user doesn't exist");
-        }
+        dataAccess.checkUser(user);
+        return dataAccess.createAuth(user.username());
+    }
+
+    public void logout(String authToken) throws DataAccessException {
+        dataAccess.deleteAuth(authToken);
     }
 }

@@ -6,15 +6,15 @@ public class GameData {
     private String whiteUsername;
     private String blackUsername;
     private String gameName;
-    private ChessGame game; // Assuming ChessGame is a class defined elsewhere
+    private ChessGame game;
 
     // Constructor
-    public GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
-        this.gameID = gameID;
-        this.whiteUsername = whiteUsername;
-        this.blackUsername = blackUsername;
-        this.gameName = gameName;
-        this.game = game;
+    public GameData() {
+        this.gameID = 0;
+        this.whiteUsername = "";
+        this.blackUsername = "";
+        this.gameName = "";
+        this.game = null;
     }
 
     // Getters
