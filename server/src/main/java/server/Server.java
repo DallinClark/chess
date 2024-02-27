@@ -96,8 +96,10 @@ public class Server {
             var game = new Gson().fromJson(req.body(), GameData.class);
             String authToken = req.headers("Authorization");
             int gameID = gameService.createGame(game.getGameName(), authToken);
+            GameData newGame = new GameData();
+            newGame.setGameID(gameID);
             res.status(200);
-            return new Gson().toJson(gameID);
+            return new Gson().toJson(newGame);
         } catch (DataAccessException ex) {
             res.status(ex.StatusCode());
             return new Gson().toJson(new ErrorResponse(ex.getMessage()));
@@ -108,7 +110,7 @@ public class Server {
     private Object joinGame(Request req, Response res) {
         try {
             var game = new Gson().fromJson(req.body(), GamePlayerData.class);
-            String authToken = req.headers("authToken");
+            String authToken = req.headers("Authorization");
             gameService.joinGame(game, authToken);
             res.status(200);
             return "";
@@ -122,8 +124,10 @@ public class Server {
 
     private Object listGames(Request req, Response res) {
         try {
-            String authToken = req.headers("authToken");
-            GameData[] games = gameService.listGames(authToken);
+            String authToken = req.headers("Authorization");
+            GameData[] gamesList = gameService.listGames(authToken);
+            GameList games = new GameList(gamesList);
+            res.status(200);
             return new Gson().toJson(games);
         } catch (DataAccessException ex) {
             res.status(ex.StatusCode());
@@ -147,14 +151,18 @@ public class Server {
     }
 
     class ErrorResponse {
-        private String errorMessage;
+        private String message;
 
         public ErrorResponse(String errorMessage) {
-            this.errorMessage = errorMessage;
+            this.message = errorMessage;
         }
 
         public String getErrorMessage() {
-            return errorMessage;
+            return message;
         }
     }
+
+    public record GameList(GameData[] games) {}
+
+
 }

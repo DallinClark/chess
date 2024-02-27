@@ -41,7 +41,7 @@ public class MemoryDataAccess implements DataAccess {
                 }
             }
         }
-        throw new DataAccessException(500, "Error: description");
+        throw new DataAccessException(401, "Error: unauthorized");
     }
 
     @Override
@@ -71,35 +71,41 @@ public class MemoryDataAccess implements DataAccess {
         newGame.setGameName(gameName);
         newGame.setGameID(++nextID);
         newGame.setGame(new ChessGame());
+        newGame.setBlackUsername(null);
+        newGame.setWhiteUsername(null);
         games.add(newGame);
         return nextID;
     }
 
     @Override
     public void joinGame(GamePlayerData game, String authToken) throws DataAccessException {
+
         for (GameData checkGame : games) {
             if (checkGame.getGameID() == game.gameID()) {
+                if (game.playerColor() == null) {
+                    return;
+                }
                 if (game.playerColor().equals("WHITE")) {
-                    if (checkGame.getWhiteUsername().isEmpty()) {
+                    if (checkGame.getWhiteUsername() == null) {
                         checkGame.setWhiteUsername(this.userFromAuth(authToken));
                         return;
                     }
                     else {
-                        throw new DataAccessException(403, "Error: already taken");
+                        throw new DataAccessException(403, "Error: forbidden");
                     }
                 }
-                else {
-                    if (checkGame.getBlackUsername().isEmpty()) {
+                else if (game.playerColor().equals("BLACK")) {
+                    if (checkGame.getBlackUsername() == null) {
                         checkGame.setBlackUsername(this.userFromAuth(authToken));
                         return;
                     }
                     else {
-                        throw new DataAccessException(403, "Error: already taken");
+                        throw new DataAccessException(403, "Error: forbidden");
                     }
                 }
             }
         }
-        throw new DataAccessException(500, "Error: description");
+        throw new DataAccessException(400, "Error: bad request");
     }
 
     @Override
@@ -128,6 +134,9 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
+        if (user.password() == null || user.username() == null || user.email() == null) {
+            throw new DataAccessException(400, "Error: bad request");
+        }
         users.add(user);
     }
 
