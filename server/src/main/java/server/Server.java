@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.GamePlayerData;
+import dataAccess.MemoryDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -16,7 +17,7 @@ public class Server {
 
 
     public Server() {
-        DataAccess dataAccess = null;
+        DataAccess dataAccess = new MemoryDataAccess();
         gameService = new GameService(dataAccess);
         userService = new UserService(dataAccess);
     }
@@ -42,6 +43,8 @@ public class Server {
 
         Spark.delete("/db", this::clear);
 
+        Spark.exception(DataAccessException.class, this::exceptionHandler);
+
         Spark.awaitInitialization();
         return Spark.port();
     }
@@ -51,58 +54,107 @@ public class Server {
         Spark.awaitStop();
     }
 
-    public String registerUser(Request req, Response res) throws DataAccessException{
-        UserData user = new Gson().fromJson(req.body(), UserData.class);
-        AuthData registeredUser = userService.registerUser(user);
-        return new Gson().toJson(registeredUser);
-    }
-
-    public String login(Request req, Response res) throws DataAccessException {
-        var user = new Gson().fromJson(req.body(), UserData.class);
-        AuthData authToken = userService.login(user);
-        return new Gson().toJson(authToken);
-    }
-
-    public Object logout(Request req, Response res) throws DataAccessException{
-        var authToken = req.headers("Authorization");
-        userService.logout(authToken);
-        res.status(200);
-        return "";
-    }
-
-    public String createGame(Request req, Response res) throws DataAccessException{
-        var game = new Gson().fromJson(req.body(), GameData.class);
-        String authToken = req.headers("Authorization");
-        int gameID = gameService.createGame(game.getGameName(), authToken);
-        res.status(200);
-        return new Gson().toJson(gameID);
-    }
-
-    public Object joinGame(Request req, Response res) throws DataAccessException {
-
-        var game = new Gson().fromJson(req.body(), GamePlayerData.class);
-        String authToken = req.headers("authToken");
-        gameService.joinGame(game, authToken);
-        res.status(200);
-        return "";
+    private Object registerUser(Request req, Response res) {
+        try {
+            UserData user = new Gson().fromJson(req.body(), UserData.class);
+            AuthData registeredUser = userService.registerUser(user);
+            res.status(200);
+            return new Gson().toJson(registeredUser);
+        } catch (DataAccessException ex) {
+            res.status(ex.StatusCode());
+            return new Gson().toJson(new ErrorResponse(ex.getMessage()));
+        }
 
     }
 
-    public String listGames(Request req, Response res) throws DataAccessException{
-
-        String authToken = req.headers("authToken");
-        GameData[] games = gameService.listGames(authToken);
-        return new Gson().toJson(games);
+    private Object login(Request req, Response res)  {
+        try {
+            var user = new Gson().fromJson(req.body(), UserData.class);
+            AuthData authToken = userService.login(user);
+            return new Gson().toJson(authToken);
+        } catch (DataAccessException ex) {
+            res.status(ex.StatusCode());
+            return new Gson().toJson(new ErrorResponse(ex.getMessage()));
+        }
     }
-    public Object clear(Request req, Response res) throws DataAccessException{
-        gameService.clear();
-        res.status(200);
-        return "";
 
+    private Object logout(Request req, Response res) {
+        try {
+            var authToken = req.headers("Authorization");
+            userService.logout(authToken);
+            res.status(200);
+            return "";
+        } catch (DataAccessException ex) {
+            res.status(ex.StatusCode());
+            return new Gson().toJson(new ErrorResponse(ex.getMessage()));
+
+        }
+    }
+
+    private Object createGame(Request req, Response res) {
+        try {
+            var game = new Gson().fromJson(req.body(), GameData.class);
+            String authToken = req.headers("Authorization");
+            int gameID = gameService.createGame(game.getGameName(), authToken);
+            res.status(200);
+            return new Gson().toJson(gameID);
+        } catch (DataAccessException ex) {
+            res.status(ex.StatusCode());
+            return new Gson().toJson(new ErrorResponse(ex.getMessage()));
+
+        }
+    }
+
+    private Object joinGame(Request req, Response res) {
+        try {
+            var game = new Gson().fromJson(req.body(), GamePlayerData.class);
+            String authToken = req.headers("authToken");
+            gameService.joinGame(game, authToken);
+            res.status(200);
+            return "";
+        } catch (DataAccessException ex) {
+            res.status(ex.StatusCode());
+            return new Gson().toJson(new ErrorResponse(ex.getMessage()));
+
+        }
+
+    }
+
+    private Object listGames(Request req, Response res) {
+        try {
+            String authToken = req.headers("authToken");
+            GameData[] games = gameService.listGames(authToken);
+            return new Gson().toJson(games);
+        } catch (DataAccessException ex) {
+            res.status(ex.StatusCode());
+            return new Gson().toJson(new ErrorResponse(ex.getMessage()));
+
+        }
+    }
+    private Object clear(Request req, Response res) {
+        try {
+            gameService.clear();
+            res.status(200);
+            return "";
+        } catch (DataAccessException ex) {
+            res.status(ex.StatusCode());
+            return new Gson().toJson(new ErrorResponse(ex.getMessage()));
+
+        }
     }
     private void exceptionHandler(DataAccessException ex, Request req, Response res) {
         res.status(ex.StatusCode());
     }
 
+    class ErrorResponse {
+        private String errorMessage;
 
+        public ErrorResponse(String errorMessage) {
+            this.errorMessage = errorMessage;
+        }
+
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+    }
 }

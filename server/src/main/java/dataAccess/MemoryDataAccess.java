@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class MemoryDataAccess implements DataAccess {
-    ArrayList<AuthData> currTokens = new ArrayList<>();
-    ArrayList<GameData> games = new ArrayList<>();
-    ArrayList<UserData> users = new ArrayList<>();
+    ArrayList<AuthData> currTokens;
+    ArrayList<GameData> games;
+    ArrayList<UserData> users;
     int nextID;
     public MemoryDataAccess() {
-        currTokens = null;
-        users = null;
-        games = null;
+        this.currTokens = new ArrayList<>();
+        this.games = new ArrayList<>();
+        this.users = new ArrayList<>();
         nextID = 1;
 
     }
@@ -82,6 +82,7 @@ public class MemoryDataAccess implements DataAccess {
                 if (game.playerColor().equals("WHITE")) {
                     if (checkGame.getWhiteUsername().isEmpty()) {
                         checkGame.setWhiteUsername(this.userFromAuth(authToken));
+                        return;
                     }
                     else {
                         throw new DataAccessException(403, "Error: already taken");
@@ -90,6 +91,7 @@ public class MemoryDataAccess implements DataAccess {
                 else {
                     if (checkGame.getBlackUsername().isEmpty()) {
                         checkGame.setBlackUsername(this.userFromAuth(authToken));
+                        return;
                     }
                     else {
                         throw new DataAccessException(403, "Error: already taken");
@@ -133,13 +135,13 @@ public class MemoryDataAccess implements DataAccess {
     public AuthData createAuth(String username) throws DataAccessException {
         for (UserData user : users) {
             if (user.username().equals(username)) {
-                throw new DataAccessException(400, "Error: bad request");
+                UUID uuid = UUID.randomUUID();
+                String authToken = uuid.toString();
+                AuthData newToken = new AuthData(authToken,username);
+                currTokens.add(newToken);
+                return newToken;
             }
         }
-        UUID uuid = UUID.randomUUID();
-        String authToken = uuid.toString();
-        AuthData newToken = new AuthData(authToken,username);
-        currTokens.add(newToken);
-        return newToken;
+        throw new DataAccessException(400, "Error: bad request");
     }
 }
