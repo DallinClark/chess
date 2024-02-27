@@ -156,10 +156,6 @@ public class Server {
         public ErrorResponse(String errorMessage) {
             this.message = errorMessage;
         }
-
-        public String getErrorMessage() {
-            return message;
-        }
     }
 
     public record GameList(GameData[] games) {}

@@ -34,9 +34,7 @@ public class GameData {
         return gameName;
     }
 
-    public ChessGame getGame() {
-        return game;
-    }
+
 
     // Setters
     public void setGameID(int gameID) {

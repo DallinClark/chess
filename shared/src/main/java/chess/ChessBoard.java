@@ -68,12 +68,6 @@ public class ChessBoard {
     }
 
 
-    public void removePiece(ChessPosition position) {
-        ChessPiece piece = piecePositions[position.getRow() - 1][position.getColumn() - 1];
-        piecePositions[position.getRow() - 1][position.getColumn() - 1] = null;
-        piecePositionMap.remove(piece); // Remove the piece from the map
-    }
-
     /**
      * Gets a chess piece on the chessboard
      *
