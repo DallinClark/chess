@@ -1,6 +1,7 @@
 package dataAccessTests;
 
 
+import dataAccess.DatabaseManager;
 import dataAccess.GamePlayerData;
 import dataAccess.SqlDataAccess;
 import dataAccess.DataAccessException;
@@ -28,6 +29,12 @@ public class dataAccessTests {
     @AfterEach
     public void tearDown() throws DataAccessException {
         dataAccess.clear(); // Clean up after each test
+    }
+
+    @Test
+    public void sqlDataAccess_Constructor_Pass() {
+        // Action & Assert
+        assertDoesNotThrow(SqlDataAccess::new);
     }
 
     @Test
@@ -233,7 +240,7 @@ public class dataAccessTests {
         // Assert: Check if the database is cleared successfully (Implementation-specific assertion)
         // Implement based on how the database state is verified in your system
     }
-    
+
 
     @Test
     public void checkUser_Fail_NullUsername() throws DataAccessException {

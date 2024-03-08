@@ -22,7 +22,6 @@ public class SqlDataAccess implements DataAccess {
 
     public SqlDataAccess() throws DataAccessException {
         configureDatabase();
-
     }
 
     @Override
@@ -429,8 +428,17 @@ public class SqlDataAccess implements DataAccess {
 
     private void configureDatabase() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
+            // Create the 'chess' database if it does not exist
+            try (var createDbStatement = conn.prepareStatement("CREATE DATABASE IF NOT EXISTS chess")) {
+                createDbStatement.executeUpdate();
+            }
 
-            // Existing create statements to re-create the tables
+            // Switch to the 'chess' database
+            try (var useDbStatement = conn.prepareStatement("USE chess")) {
+                useDbStatement.executeUpdate();
+            }
+
+            // Recreate tables if they do not exist
             for (String stmt : createStatements) {
                 try (var preparedStatement = conn.prepareStatement(stmt)) {
                     preparedStatement.executeUpdate();
@@ -440,5 +448,7 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Unable to configure database: %s", ex.getMessage()));
         }
     }
+
+
 
 }
