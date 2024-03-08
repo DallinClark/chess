@@ -10,6 +10,9 @@ import model.AuthData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import java.sql.Connection;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class dataAccessTests {
@@ -146,6 +149,16 @@ public class dataAccessTests {
     }
 
     @Test
+    public void listGames_WithoutExistingGames() throws DataAccessException {
+
+        // Action
+        GameData[] games = dataAccess.listGames();
+
+        // Assert
+        assertEquals(games.length, 0);
+    }
+
+    @Test
     public void createGame_Success() throws DataAccessException {
         // Setup
         String username = "gameCreator";
@@ -154,6 +167,15 @@ public class dataAccessTests {
         String authToken = dataAccess.createAuth(username).authToken();
 
         // Action
+        int gameId = dataAccess.createGame("New Chess Game");
+
+        // Assert
+        assertTrue(gameId > 0);
+    }
+
+    @Test
+    public void createGame_Fail() throws DataAccessException {
+
         int gameId = dataAccess.createGame("New Chess Game");
 
         // Assert
@@ -178,6 +200,45 @@ public class dataAccessTests {
         // Action & Assert
         assertThrows(DataAccessException.class, () -> dataAccess.joinGame(new GamePlayerData("WHITE",-1), "someUser"));
     }
+
+    @Test
+    public void userFromAuth_Success() throws DataAccessException {
+        // Setup
+        String username = "testUser";
+        UserData user = new UserData(username, "password123", "test@example.com");
+        dataAccess.createUser(user);
+        String authToken = dataAccess.createAuth(username).authToken();
+
+        // Action
+        String retrievedUsername = dataAccess.userFromAuth(authToken);
+
+        // Assert
+        assertEquals(username, retrievedUsername);
+    }
+
+    @Test
+    public void userFromAuth_Fail_Unauthorized() throws DataAccessException {
+        // Setup
+        String authToken = "invalidAuthToken"; // An invalid authToken
+
+        // Action & Assert
+        assertThrows(DataAccessException.class, () -> dataAccess.userFromAuth(authToken));
+    }
+
+    @Test
+    public void clear_Success() throws DataAccessException {
+        // Action & Assert
+        assertDoesNotThrow(() -> dataAccess.clear());
+
+        // Assert: Check if the database is cleared successfully (Implementation-specific assertion)
+        // Implement based on how the database state is verified in your system
+    }
+
+
+
+
+
+
 
 
 
