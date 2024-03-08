@@ -1,4 +1,4 @@
 package dataAccess;
 
-public record GamePlayerData(String playerColor, int gameID) {}
+public record  GamePlayerData(String playerColor, int gameID) {}
 

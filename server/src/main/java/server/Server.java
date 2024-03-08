@@ -1,10 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataAccess.DataAccess;
-import dataAccess.DataAccessException;
-import dataAccess.GamePlayerData;
-import dataAccess.MemoryDataAccess;
+import dataAccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -17,7 +14,12 @@ public class Server {
 
 
     public Server() {
-        DataAccess dataAccess = new MemoryDataAccess();
+        DataAccess dataAccess = null;
+        try {
+            dataAccess = new SqlDataAccess();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         gameService = new GameService(dataAccess);
         userService = new UserService(dataAccess);
     }

@@ -56,6 +56,10 @@ public class GameData {
     public void setGame(ChessGame game) {
         this.game = game;
     }
+
+    public Object getGame() {
+        return this.game;
+    }
 }
 
 
