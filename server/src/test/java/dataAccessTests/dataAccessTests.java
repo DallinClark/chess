@@ -233,6 +233,66 @@ public class dataAccessTests {
         // Assert: Check if the database is cleared successfully (Implementation-specific assertion)
         // Implement based on how the database state is verified in your system
     }
+    
+
+    @Test
+    public void checkUser_Fail_NullUsername() throws DataAccessException {
+        // Setup
+        UserData user = new UserData(null, "password123", "test@example.com"); // Null username
+
+        // Action & Assert
+        assertThrows(DataAccessException.class, () -> dataAccess.checkUser(user));
+    }
+
+    @Test
+    public void createGame_Success_EmptyGameName() throws DataAccessException {
+        // Setup: Empty game name
+        String gameName = "";
+
+        // Action
+        int gameId = dataAccess.createGame(gameName);
+
+        // Assert: Check if the game ID is valid (non-negative integer indicates success)
+        assertTrue(gameId >= 0);
+    }
+
+    @Test
+    public void checkUsername_Pass_UniqueUsername() throws DataAccessException {
+        // Setup: Unique username
+        String username = "uniqueUsername";
+
+        // Action & Assert
+        assertDoesNotThrow(() -> dataAccess.checkUsername(username));
+    }
+
+    @Test
+    public void checkUsername_Pass_AlphanumericUsername() throws DataAccessException {
+        // Setup: Alphanumeric username
+        String username = "alpha123";
+
+        // Action & Assert
+        assertDoesNotThrow(() -> dataAccess.checkUsername(username));
+    }
+
+    @Test
+    public void checkUsername_Pass_SpecialCharactersUsername() throws DataAccessException {
+        // Setup: Username with special characters
+        String username = "user@example.com";
+
+        // Action & Assert
+        assertDoesNotThrow(() -> dataAccess.checkUsername(username));
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
