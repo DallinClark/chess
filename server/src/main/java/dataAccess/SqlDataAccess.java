@@ -427,16 +427,11 @@ public class SqlDataAccess implements DataAccess {
 
 
     private void configureDatabase() throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            // Create the 'chess' database if it does not exist
-            try (var createDbStatement = conn.prepareStatement("CREATE DATABASE IF NOT EXISTS chess")) {
-                createDbStatement.executeUpdate();
-            }
+        DatabaseManager.createDatabase();
 
-            // Switch to the 'chess' database
-            try (var useDbStatement = conn.prepareStatement("USE chess")) {
-                useDbStatement.executeUpdate();
-            }
+        try (var conn = DatabaseManager.getConnection()) {
+
+
 
             // Recreate tables if they do not exist
             for (String stmt : createStatements) {
