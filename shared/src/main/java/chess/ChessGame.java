@@ -11,7 +11,11 @@ import java.util.*;
 public class ChessGame {
     TeamColor teamTurn;
     ChessBoard board;
+
     public ChessGame() {
+        board = new ChessBoard();
+        teamTurn = TeamColor.WHITE;
+        board.resetBoard();
     }
 
     /**

@@ -10,10 +10,19 @@ import java.util.*;
 public class ChessBoard {
 
     ChessPiece[][] piecePositions;
-    Map<ChessPiece, ChessPosition> piecePositionMap;
+    //Map<ChessPiece, ChessPosition> piecePositionMap;
+
+    public ChessPiece[][] getPiecePositions() {
+        return piecePositions;
+    }
+
+    public void setPiecePositions(ChessPiece[][] piecePositions) {
+        this.piecePositions = piecePositions;
+    }
+
     public ChessBoard() {
         piecePositions = new ChessPiece[8][8];
-        piecePositionMap = new HashMap<>();
+        //piecePositionMap = new HashMap<>();
     }
 
     /**
@@ -24,7 +33,7 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         piecePositions[position.getRow()-1][position.getColumn()-1] = piece;
-        piecePositionMap.put(piece, position);
+        //piecePositionMap.put(piece, position);
     }
 
     public void movePiece(ChessMove move) {
@@ -35,35 +44,36 @@ public class ChessBoard {
         ChessPosition endPos = move.getEndPosition();
         ChessPiece piece = getPiece(startPos);
         if (piecePositions[endPos.getRow() - 1][endPos.getColumn() - 1] != null) {
-            piecePositionMap.remove(getPiece(endPos));
+            //piecePositionMap.remove(getPiece(endPos));
         }
-        piecePositionMap.remove(piece);
-        piecePositionMap.put(piece, endPos);
+        //piecePositionMap.remove(piece);
+        //piecePositionMap.put(piece, endPos);
         piecePositions[startPos.getRow() - 1][startPos.getColumn() - 1] = null;
         piecePositions[endPos.getRow() - 1][endPos.getColumn() - 1] = piece;
     }
 
     public ChessPosition getPosition(ChessPiece piece) {
-        return piecePositionMap.get(piece);
+        //return piecePositionMap.get(piece);
+        return null;
     }
 
-    public ChessPosition getKingPosition(ChessGame.TeamColor team) {
-        for (Map.Entry<ChessPiece, ChessPosition> entry : piecePositionMap.entrySet()) {
+   public ChessPosition getKingPosition(ChessGame.TeamColor team) {
+        /*for (Map.Entry<ChessPiece, ChessPosition> entry : piecePositionMap.entrySet()) {
             ChessPiece piece = entry.getKey();
             if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == team) {
                 return entry.getValue();
             }
-        }
+        }*/
         return null;
     }
 
     public ChessPiece getKingPiece(ChessGame.TeamColor team) {
-        for (Map.Entry<ChessPiece, ChessPosition> entry : piecePositionMap.entrySet()) {
+        /*for (Map.Entry<ChessPiece, ChessPosition> entry : piecePositionMap.entrySet()) {
             ChessPiece piece = entry.getKey();
             if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == team) {
                 return piece;
             }
-        }
+        }*/
         return null;
     }
 
@@ -98,7 +108,7 @@ public class ChessBoard {
      */
     public void resetBoard() {
         // Clear existing pieces
-        piecePositionMap.clear();
+        //piecePositionMap.clear();
         piecePositions = new ChessPiece[8][8];
 
         // Set up the white pieces

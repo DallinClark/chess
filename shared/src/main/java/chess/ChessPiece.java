@@ -25,6 +25,14 @@ public class ChessPiece {
         this.id = nextId++;
     }
 
+    public static int getNextId() {
+        return nextId;
+    }
+
+    public static void setNextId(int nextId) {
+        ChessPiece.nextId = nextId;
+    }
+
     /**
      * The various different chess piece options
      */

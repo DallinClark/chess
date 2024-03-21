@@ -2,8 +2,8 @@ package serviceTests;
 
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
+import dataAccess.SqlDataAccess;
 import model.GamePlayerData;
-import dataAccess.MemoryDataAccess;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +18,8 @@ public class GameServiceTest {
     private DataAccess dataAccess;
 
     @BeforeEach
-    public void setUp() {
-        dataAccess = new MemoryDataAccess();
+    public void setUp() throws DataAccessException {
+        dataAccess = new SqlDataAccess();
         gameService = new GameService(dataAccess);
     }
 

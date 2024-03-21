@@ -2,6 +2,7 @@ package dataAccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import model.AuthData;
 import model.GameData;
 import model.GamePlayerData;
@@ -274,7 +275,6 @@ public class SqlDataAccess implements DataAccess {
                     } else {
                         // If the requested color is already taken or an invalid color was provided
                         conn.rollback(); // Roll back to maintain consistent state
-                        throw new DataAccessException(403, "Error: forbidden");
                     }
 
                     conn.commit(); // Commit the transaction
@@ -334,8 +334,9 @@ public class SqlDataAccess implements DataAccess {
                         game.setWhiteUsername(rs.getString("whiteUsername"));
                         game.setBlackUsername(rs.getString("blackUsername"));
 
+                        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
                         String json = rs.getString("json");
-                        ChessGame chessGame = new Gson().fromJson(json, ChessGame.class);
+                        ChessGame chessGame = gson.fromJson(json, ChessGame.class);
                         game.setGame(chessGame);
 
                         gameList.add(game);

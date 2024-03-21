@@ -1,8 +1,8 @@
 package serviceTests;
 
 import dataAccess.DataAccess;
-import dataAccess.MemoryDataAccess;
 import dataAccess.DataAccessException;
+import dataAccess.SqlDataAccess;
 import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +17,8 @@ public class UserServiceTest {
     private DataAccess dataAccess;
 
     @BeforeEach
-    public void setUp() {
-        dataAccess = new MemoryDataAccess();
+    public void setUp() throws DataAccessException {
+        dataAccess = new SqlDataAccess();
         userService = new UserService(dataAccess);
     }
 

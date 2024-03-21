@@ -1,6 +1,7 @@
 package client;
 
 
+import chess.ChessGame;
 import client.WebSocket.NotificationHandler;
 import model.GamePlayerData;
 import exception.ResponseException;
@@ -9,6 +10,7 @@ import model.UserData;
 import model.GameData;
 import model.GameList;
 import server.ServerFacade;
+import ui.PrintBoard;
 
 import java.io.IOException;
 
@@ -17,6 +19,12 @@ import static java.lang.Integer.parseInt;
 public class ChessClient {
     private final ServerFacade serverFacade;
     private boolean isLoggedIn = false;
+
+    GameList currList;
+
+    PrintBoard boardPrinter;
+
+    private boolean inGame = false;
     private String username;
 
     private AuthData playerAuth;
@@ -54,7 +62,10 @@ public class ChessClient {
         UserData user = new UserData(tokens[1], tokens[2], tokens[3]);
         try {
             playerAuth = serverFacade.registerUser(user);
-            return "Registration successful.";
+            playerAuth = serverFacade.login(user);
+            this.isLoggedIn = true;
+            this.username = tokens[1];
+            return "Registration successful, you're now logged in.";
         } catch (IOException | ResponseException e) {
             return "Registration failed: " + e.getMessage();
         }
@@ -93,8 +104,8 @@ public class ChessClient {
             }
             GameData gameData = new GameData();
             gameData.setGameName(params[1]);
-            GameData game = serverFacade.createGame(gameData, playerAuth.authToken());
-            return "Game created successfully, GameID: " + game.getGameID();
+            serverFacade.createGame(gameData, playerAuth.authToken());
+            return "Game created successfully";
         } catch (IOException | ResponseException e) {
             return "Game Creation failed: " + e.getMessage();
         }
@@ -105,8 +116,12 @@ public class ChessClient {
             if (!isLoggedIn) {
                 return "Please login first.";
             }
-            GamePlayerData gameData = new GamePlayerData(tokens[1], parseInt(tokens[2]));
+            inGame = true;
+            int gameId = currList.getIdFromIndex(parseInt(tokens[2]));
+            GamePlayerData gameData = new GamePlayerData(tokens[1], gameId);
             serverFacade.joinGame(gameData, playerAuth.authToken());
+            ChessGame game = (ChessGame) currList.getGameFromIndex(parseInt(tokens[2]));
+            PrintBoard.printGameBoard(game.getBoard());
             return "Joined game successfully.";
         } catch (IOException | ResponseException e) {
             return "Game Join failed: " + e.getMessage();
@@ -118,8 +133,8 @@ public class ChessClient {
             if (!isLoggedIn) {
                 return "Please login first.";
             }
-            GameList list = serverFacade.listGames(playerAuth.authToken());
-            return "List of games: " + list.toString();
+            currList = serverFacade.listGames(playerAuth.authToken());
+            return "List of games: \n" + currList.toString();
         } catch (IOException | ResponseException e) {
             return "Game List failed: " + e.getMessage();
         }
@@ -128,17 +143,18 @@ public class ChessClient {
     public String help() {
         if (!isLoggedIn) {
             return """
-                    - signIn <yourname>
-                    - quit
+                    Here are your options
+                    Login <username> <password>
+                    Register <username> <password> <email>
+                    List
                     """;
         }
         return """
-                - list
-                - adopt <pet id>
-                - rescue <name> <CAT|DOG|FROG|FISH>
-                - adoptAll
-                - signOut
-                - quit
+                Here are your options
+                - List
+                - Logout
+                - Join <Color> <GameNumber>
+                - Create <GameName>
                 """;
     }
 }

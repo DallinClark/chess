@@ -18,6 +18,10 @@ public class ServerFacade {
     public ServerFacade(String url) {
         this.serverUrl = url;
     }
+    public void clear() throws IOException, ResponseException {
+        String path = "/db";
+        this.makeRequest("DELETE", path, null, null, null);
+    }
 
     public AuthData registerUser(UserData user) throws IOException, ResponseException {
         String path = "/user";
@@ -96,4 +100,6 @@ public class ServerFacade {
             }
         }
     }
+
+
 }
