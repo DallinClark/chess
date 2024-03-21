@@ -3,6 +3,7 @@ package dataAccess;
 import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
+import model.GamePlayerData;
 import model.UserData;
 
 import java.util.ArrayList;

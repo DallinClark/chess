@@ -4,9 +4,11 @@ import com.google.gson.Gson;
 import dataAccess.*;
 import model.AuthData;
 import model.GameData;
+import model.GamePlayerData;
 import model.UserData;
 import service.*;
 import spark.*;
+import model.GameList;
 
 public class Server {
     GameService gameService;
@@ -159,8 +161,6 @@ public class Server {
             this.message = errorMessage;
         }
     }
-
-    public record GameList(GameData[] games) {}
 
 
 }

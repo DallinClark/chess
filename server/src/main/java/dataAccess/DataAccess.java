@@ -2,6 +2,7 @@ package dataAccess;
 
 import model.AuthData;
 import model.GameData;
+import model.GamePlayerData;
 import model.UserData;
 
 public interface DataAccess {

@@ -2,6 +2,7 @@ package service;
 
 import dataAccess.*;
 import model.GameData;
+import model.GamePlayerData;
 
 public class GameService {
     private final DataAccess dataAccess;

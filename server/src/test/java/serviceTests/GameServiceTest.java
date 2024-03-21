@@ -2,7 +2,7 @@ package serviceTests;
 
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
-import dataAccess.GamePlayerData;
+import model.GamePlayerData;
 import dataAccess.MemoryDataAccess;
 import model.GameData;
 import model.UserData;

@@ -60,6 +60,8 @@ public class GameData {
     public Object getGame() {
         return this.game;
     }
+
+    public String getName() { return this.gameName;}
 }
 
 

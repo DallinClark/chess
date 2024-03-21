@@ -1,8 +1,7 @@
 package dataAccessTests;
 
 
-import dataAccess.DatabaseManager;
-import dataAccess.GamePlayerData;
+import model.GamePlayerData;
 import dataAccess.SqlDataAccess;
 import dataAccess.DataAccessException;
 import model.GameData;
@@ -11,8 +10,6 @@ import model.AuthData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import java.sql.Connection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
