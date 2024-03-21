@@ -22,11 +22,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ServerFacadeTests {
 
     private static Server server;
+    private static int port;
 
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(0);
+        port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
     }
 
@@ -43,14 +44,14 @@ public class ServerFacadeTests {
 
     @Test
     public void register_Success() throws ResponseException, IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         AuthData data = sf.registerUser(new UserData("user", "pass", "email"));
         assertNotNull(data.authToken());
     }
     @Test
     public void register_Fail() throws ResponseException, IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         UserData existingUser = new UserData("existingUser", "pass", "email");
 
@@ -62,7 +63,7 @@ public class ServerFacadeTests {
 
     @Test
     public void login_Success() throws ResponseException, IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         UserData user = new UserData("user", "pass", "email");
         sf.registerUser(user); // Ensure the user is registered before login
@@ -72,7 +73,7 @@ public class ServerFacadeTests {
 
     @Test
     public void login_Fail_WrongPassword() throws IOException, ResponseException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         UserData user = new UserData("user", "correctPass", "email");
         sf.registerUser(user); // Ensure the user is registered
@@ -83,7 +84,7 @@ public class ServerFacadeTests {
 
     @Test
     public void logout_Success() throws ResponseException, IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         UserData user = new UserData("user", "pass", "email");
         sf.registerUser(user);
@@ -92,14 +93,14 @@ public class ServerFacadeTests {
     }
     @Test
     public void logout_Fail_InvalidToken() throws IOException, ResponseException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         // Attempting to logout with an invalid token should fail
         assertThrows(ResponseException.class, () -> sf.logout("invalidToken"));
     }
     @Test
     public void createGame_Success() throws ResponseException, IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         UserData user = new UserData("user", "pass", "email");
         sf.registerUser(user);
@@ -114,7 +115,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void createGame_Fail_Unauthorized() throws IOException, ResponseException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         GameData newGame = new GameData();
         newGame.setGameName("ChessGame2");
@@ -124,7 +125,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void joinGame_Success() throws ResponseException, IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         // Assume we have a way to create a game and get its ID
         String gameId = "validGameId"; // Placeholder for a valid game ID
@@ -137,7 +138,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void joinGame_Fail_GameNotFound() throws IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         String invalidGameId = "invalidGameId"; // Placeholder for an invalid game ID
         GamePlayerData joinRequest = new GamePlayerData("user", 1234);
 
@@ -149,7 +150,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void listGames_Success() throws ResponseException, IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         sf.clear();
         UserData user = new UserData("listUser", "pass", "list@example.com");
         sf.registerUser(user);
@@ -163,7 +164,7 @@ public class ServerFacadeTests {
     }
     @Test
     public void listGames_Fail_Unauthorized() throws IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         // Attempting to list games without or with invalid authentication should fail
         assertThrows(ResponseException.class, () -> sf.listGames("invalidToken"));
     }
@@ -171,7 +172,7 @@ public class ServerFacadeTests {
 
     @Test
     public void clear_Success_RemovesAllGames() throws ResponseException, IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
         // Precondition: Assuming at least one game exists before clearing
         UserData user = new UserData("userForClear", "pass", "emailForClear@example.com");
         sf.registerUser(user);
@@ -184,7 +185,7 @@ public class ServerFacadeTests {
         }
     @Test
     public void clear_Fail_Unauthorized() throws IOException {
-        ServerFacade sf = new ServerFacade("http://localhost:8080");
+        ServerFacade sf = new ServerFacade("http://localhost:" + port);
 
     }
 
