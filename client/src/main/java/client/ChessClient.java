@@ -20,7 +20,9 @@ import static java.lang.Integer.parseInt;
 public class ChessClient {
     private final ServerFacade serverFacade;
     private boolean isLoggedIn = false;
+    private boolean isPlayer;
     GameList currList;
+    String color;
     private final NotificationHandler notificationHandler;
     private final String serverUrl;
     private WebSocketFacade ws;
@@ -35,6 +37,7 @@ public class ChessClient {
         this.notificationHandler = notificationHandler;
         this.serverUrl = serverUrl;
         this.gameID = -1;
+        this.color = null;
     }
 
     public String eval(String input) {
@@ -73,18 +76,26 @@ public class ChessClient {
     }
 
     private String leaveGame() throws ResponseException {
-        ws.leaveGame(username, playerAuth.authToken(), gameID);
+        ws.leaveGame(username, playerAuth.authToken(), gameID, isPlayer);
         gameID = -1;
+        inGame = false;
         ws = null;
-        return null;
+        return "Left Game Successfully";
     }
 
-    private String redrawBoard() {
-        return null;
+    private String redrawBoard() throws ResponseException {
+        ws.redrawBoard(gameID, playerAuth.authToken(), this.color);
+        return "";
     }
 
-    private String makeMove(String[] tokens) {
-        return null;
+    private String makeMove(String[] tokens) throws ResponseException {
+        if (isPlayer) {
+            ws.makeMove(tokens[1], tokens[2], color, gameID, tokens[3], username, playerAuth.authToken());
+        }
+        else {
+            return "\n Can't move, you are not a player";
+        }
+        return "";
     }
 
     private String resign() {
@@ -161,9 +172,17 @@ public class ChessClient {
             ws = new WebSocketFacade(serverUrl, notificationHandler);
             if (tokens[1].equals("WHITE") || tokens[1].equals("BLACK")) {
                 ws.joinGamePlayer(username, playerAuth.authToken(), tokens[1], gameID);
+                isPlayer = true;
             }
             else {
                 ws.joinGameObserver(username, playerAuth.authToken(), gameID);
+                isPlayer = false;
+            }
+            if (tokens[1].equals("BLACK")) {
+                this.color = "BLACK";
+            }
+            else if (tokens[1].equals("WHITE")) {
+                this.color = "WHITE";
             }
             this.inGame = true;
             return "Joined game successfully.";
@@ -190,7 +209,7 @@ public class ChessClient {
                     Here are your options
                     Redraw
                     Leave
-                    Move <old spot> <new spot>
+                    Move <old spot> <new spot> <promotion piece (null if not applicable)>
                     Resign
                     Highlight
                     """;

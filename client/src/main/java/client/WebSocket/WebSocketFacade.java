@@ -44,6 +44,28 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
+    public void makeMove(String oldPos, String newPos, String color, int gameID, String promotionPiece, String username, String authToken) throws ResponseException {
+        try {
+            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.MAKE_MOVE, color, gameID);
+            action.setOldMove(oldPos);
+            action.setNewMove(newPos);
+            action.setPromotionPiece(promotionPiece);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+
+    }
+
+    public void redrawBoard(int gameID, String authToken, String color) throws ResponseException {
+        try {
+            var action = new UserGameCommand(authToken, null, UserGameCommand.CommandType.REDRAW, color, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
     public void joinGamePlayer(String username, String authToken, String color, int gameID) throws ResponseException {
         try {
             var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.JOIN_PLAYER, color, gameID);
@@ -62,9 +84,16 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void leaveGame(String username, String authToken,int gameID) throws ResponseException {
+    public void leaveGame(String username, String authToken,int gameID, boolean isPlayer) throws ResponseException {
         try {
-            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.LEAVE, null, gameID);
+            String message;
+            if (isPlayer) {
+                message = "player";
+            }
+            else {
+                message = "observer";
+            }
+            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.LEAVE, message, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
             this.session.close();
         } catch (IOException ex) {

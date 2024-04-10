@@ -44,7 +44,9 @@ public class Repl implements NotificationHandler {
             printPrompt();
         }
         if (notification.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            System.out.print("\n");
             PrintBoard.printGameBoard(notification.getGame().getBoard(), null);
+            printPrompt();
         }
 
     }

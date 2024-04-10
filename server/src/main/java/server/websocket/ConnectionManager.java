@@ -1,6 +1,8 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -12,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
     public ChessGame gameState;
+    public boolean gameOver;
 
     public ChessGame getGameState() {
         return gameState;
@@ -21,8 +24,17 @@ public class ConnectionManager {
         this.gameState = gameState;
     }
 
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+    }
+
     public ConnectionManager(ChessGame game) {
         gameState = game;
+        gameOver = false;
     }
 
     public void add(String authToken, Session session) {
@@ -32,6 +44,9 @@ public class ConnectionManager {
 
     public void remove(String authToken) {
         connections.remove(authToken);
+    }
+    public void makeMove(ChessMove move) throws InvalidMoveException {
+        gameState.makeMove(move);
     }
 
     public void broadcast(String excludeToken, ServerMessage message) throws IOException {
@@ -54,6 +69,12 @@ public class ConnectionManager {
 
     public void singleBroadcast(String authToken, ServerMessage message) throws IOException {
         connections.get(authToken).send(new Gson().toJson(message));
+    }
+
+    public void endGame() {
+        for (var c : connections.values()) {
+            connections.remove(c.authToken);
+        }
     }
 
 }

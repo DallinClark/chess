@@ -19,16 +19,14 @@ public class PrintBoard {
         // Column labels
         printColumnLabels(builder, isBlack);
 
-        builder.append("\n");
-
         // Adjust row printing order based on the player's color
-        for (int row = isBlack ? 1 : 8; isBlack ? row <= 8 : row >= 1; row += isBlack ? 1 : -1) {
+        for (int row = isBlack ? 8 : 1; isBlack ? row >= 1 : row <= 8; row += isBlack ? -1 : 1) {
             builder.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY)
-                    .append(9 - row)
+                    .append(row)
                     .append(EscapeSequences.RESET_TEXT_COLOR);
 
             // Adjust column printing order based on the player's color
-            for (int col = isBlack ? 8 : 1; isBlack ? col >= 1 : col <= 8; col += isBlack ? -1 : 1) {
+            for (int col = isBlack ? 1 : 8; isBlack ? col <= 8 : col >= 1; col += isBlack ? 1 : -1) {
                 // Assuming ChessPosition constructor takes (row, column) in that order
                 ChessPosition position = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(position);
@@ -52,7 +50,7 @@ public class PrintBoard {
 
     private static void printColumnLabels(StringBuilder builder, boolean isBlack) {
         builder.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY);
-        if (!isBlack) {
+        if (isBlack) {
             builder.append("   a    b    c   d    e    f    g    h");
         } else {
             builder.append("   h    g    f   e    d    c    b    a"); // Reverse order for black
@@ -68,17 +66,17 @@ public class PrintBoard {
 
         switch (piece.getPieceType()) {
             case KING:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING;
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.BLACK_KING : EscapeSequences.WHITE_KING;
             case QUEEN:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_QUEEN : EscapeSequences.BLACK_QUEEN;
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.BLACK_QUEEN : EscapeSequences.WHITE_QUEEN;
             case BISHOP:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP;
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.BLACK_BISHOP : EscapeSequences.WHITE_BISHOP;
             case KNIGHT:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT;
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.BLACK_KNIGHT : EscapeSequences.WHITE_KNIGHT;
             case ROOK:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK;
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.BLACK_ROOK : EscapeSequences.WHITE_ROOK;
             case PAWN:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN;
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.BLACK_PAWN : EscapeSequences.WHITE_PAWN;
             default:
                 return EscapeSequences.EMPTY;
         }

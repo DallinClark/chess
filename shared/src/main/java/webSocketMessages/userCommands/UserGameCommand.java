@@ -44,6 +44,24 @@ public class UserGameCommand {
         this.type = type;
         this.message = message;
         this.gameID = gameID;
+        this.oldMove = null;
+        this.newMove = null;
+    }
+
+    public String getOldMove() {
+        return oldMove;
+    }
+
+    public void setOldMove(String oldMove) {
+        this.oldMove = oldMove;
+    }
+
+    public String getNewMove() {
+        return newMove;
+    }
+
+    public void setNewMove(String newMove) {
+        this.newMove = newMove;
     }
 
     public enum CommandType {
@@ -51,7 +69,10 @@ public class UserGameCommand {
         JOIN_OBSERVER,
         MAKE_MOVE,
         LEAVE,
-        RESIGN
+        RESIGN,
+        REDRAW,
+        HIGHLIGHT
+
     }
 
     protected CommandType commandType;
@@ -59,6 +80,18 @@ public class UserGameCommand {
     private final String authToken;
     public String username;
     public CommandType type;
+
+    public String getPromotionPiece() {
+        return promotionPiece;
+    }
+
+    public void setPromotionPiece(String promotionPiece) {
+        this.promotionPiece = promotionPiece;
+    }
+
+    public String oldMove;
+    public String newMove;
+    public String promotionPiece;
     public String message;
     public int gameID;
     public String getAuthString() {
