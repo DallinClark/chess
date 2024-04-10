@@ -13,8 +13,8 @@ public class ChessGame {
     ChessBoard board;
 
     public ChessGame() {
-        board = new ChessBoard();
         teamTurn = TeamColor.WHITE;
+        board = new ChessBoard();
         board.resetBoard();
     }
 
@@ -106,24 +106,28 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        TeamColor oppTeam;
+        TeamColor oppTeam = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
         ChessPosition kingPos = board.getKingPosition(teamColor);
-        if (teamColor == TeamColor.WHITE) {
-            oppTeam = TeamColor.BLACK;
+
+        if (kingPos == null) {
+            return false; // This should not happen in a valid game state
         }
-        else {
-            oppTeam = TeamColor.WHITE;
-        }
+
+        // Iterate over all pieces of the opposing team to see if any can move to the king's position
         for (ChessPiece piece : board.getPieces(oppTeam)) {
             ChessPosition piecePos = board.getPosition(piece);
+
+            // For each piece, generate all valid moves considering the current board state
             for (ChessMove move : piece.pieceMoves(board, piecePos)) {
+                // Check if any move ends at the king's position
                 if (move.getEndPosition().equals(kingPos)) {
                     return true;
                 }
             }
         }
-        return false;
+        return false; // If no opposing piece can legally move to the king's position, not in check
     }
+
 
     /**
      * Determines if the given team is in checkmate

@@ -10,15 +10,7 @@ import java.util.*;
 public class ChessBoard {
 
     ChessPiece[][] piecePositions;
-    //Map<ChessPiece, ChessPosition> piecePositionMap;
 
-    public ChessPiece[][] getPiecePositions() {
-        return piecePositions;
-    }
-
-    public void setPiecePositions(ChessPiece[][] piecePositions) {
-        this.piecePositions = piecePositions;
-    }
 
     public ChessBoard() {
         piecePositions = new ChessPiece[8][8];
@@ -33,7 +25,6 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         piecePositions[position.getRow()-1][position.getColumn()-1] = piece;
-        //piecePositionMap.put(piece, position);
     }
 
     public void movePiece(ChessMove move) {
@@ -43,38 +34,44 @@ public class ChessBoard {
         ChessPosition startPos = move.getStartPosition();
         ChessPosition endPos = move.getEndPosition();
         ChessPiece piece = getPiece(startPos);
-        if (piecePositions[endPos.getRow() - 1][endPos.getColumn() - 1] != null) {
-            //piecePositionMap.remove(getPiece(endPos));
-        }
-        //piecePositionMap.remove(piece);
-        //piecePositionMap.put(piece, endPos);
         piecePositions[startPos.getRow() - 1][startPos.getColumn() - 1] = null;
         piecePositions[endPos.getRow() - 1][endPos.getColumn() - 1] = piece;
     }
 
     public ChessPosition getPosition(ChessPiece piece) {
-        //return piecePositionMap.get(piece);
-        return null;
+        for (int row = 0; row < piecePositions.length; row++) {
+            for (int column = 0; column < piecePositions[row].length; column++) {
+                ChessPiece currentPiece = piecePositions[row][column];
+                if (currentPiece != null && currentPiece.equals(piece)) {
+                    return new ChessPosition(row + 1, column + 1);
+                }
+            }
+        }
+        return null; // Piece not found
     }
 
-   public ChessPosition getKingPosition(ChessGame.TeamColor team) {
-        /*for (Map.Entry<ChessPiece, ChessPosition> entry : piecePositionMap.entrySet()) {
-            ChessPiece piece = entry.getKey();
-            if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == team) {
-                return entry.getValue();
+    public ChessPosition getKingPosition(ChessGame.TeamColor team) {
+        for (int row = 0; row < piecePositions.length; row++) {
+            for (int column = 0; column < piecePositions[row].length; column++) {
+                ChessPiece currentPiece = piecePositions[row][column];
+                if (currentPiece != null && currentPiece.getPieceType() == ChessPiece.PieceType.KING && currentPiece.getTeamColor() == team) {
+                    return new ChessPosition(row + 1, column + 1);
+                }
             }
-        }*/
-        return null;
+        }
+        return null; // King not found or something went wrong
     }
 
     public ChessPiece getKingPiece(ChessGame.TeamColor team) {
-        /*for (Map.Entry<ChessPiece, ChessPosition> entry : piecePositionMap.entrySet()) {
-            ChessPiece piece = entry.getKey();
-            if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == team) {
-                return piece;
+        for (int row = 0; row < piecePositions.length; row++) {
+            for (int column = 0; column < piecePositions[row].length; column++) {
+                ChessPiece currentPiece = piecePositions[row][column];
+                if (currentPiece != null && currentPiece.getPieceType() == ChessPiece.PieceType.KING && currentPiece.getTeamColor() == team) {
+                    return currentPiece;
+                }
             }
-        }*/
-        return null;
+        }
+        return null; // King not found
     }
 
 
@@ -86,6 +83,11 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
+        int row = position.getRow();
+        int column = position.getColumn();
+        if (row < 1 || row > 9 || column < 1 || column > 9) {
+            return null;
+        }
         return piecePositions[position.getRow()-1][position.getColumn()-1];
     }
 
