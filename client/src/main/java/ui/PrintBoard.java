@@ -10,22 +10,27 @@ import chess.ChessGame.TeamColor.*;
 
 public class PrintBoard {
 
-    public static void printGameBoard(ChessBoard board) {
+    public static void printGameBoard(ChessBoard board, String color) {
         StringBuilder builder = new StringBuilder();
 
-        // Top border
-        builder.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY)
-                .append("  a b c d e f g h")
-                .append(EscapeSequences.RESET_TEXT_COLOR)
-                .append("\n");
+        // Determine if the current player is black to decide the order of printing
+        boolean isBlack = "BLACK".equalsIgnoreCase(color);
 
-        for (int row = 8; row >= 1; row--) {
+        // Column labels
+        printColumnLabels(builder, isBlack);
+
+        builder.append("\n");
+
+        // Adjust row printing order based on the player's color
+        for (int row = isBlack ? 1 : 8; isBlack ? row <= 8 : row >= 1; row += isBlack ? 1 : -1) {
             builder.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY)
-                    .append(row)
+                    .append(9 - row)
                     .append(EscapeSequences.RESET_TEXT_COLOR);
 
-            for (int col = 1; col <= 8; col++) {
-                ChessPosition position = new ChessPosition(col, row);
+            // Adjust column printing order based on the player's color
+            for (int col = isBlack ? 8 : 1; isBlack ? col >= 1 : col <= 8; col += isBlack ? -1 : 1) {
+                // Assuming ChessPosition constructor takes (row, column) in that order
+                ChessPosition position = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(position);
 
                 // Alternate cell colors for better visibility
@@ -36,13 +41,24 @@ public class PrintBoard {
                 }
 
                 String pieceSymbol = getPieceSymbol(piece);
-                builder.append(pieceSymbol)
+                builder.append(" ").append(pieceSymbol)
                         .append(EscapeSequences.RESET_BG_COLOR); // Reset background color after each cell
             }
             builder.append("\n");
         }
 
         System.out.println(builder.toString());
+    }
+
+    private static void printColumnLabels(StringBuilder builder, boolean isBlack) {
+        builder.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY);
+        if (!isBlack) {
+            builder.append("   a    b    c   d    e    f    g    h");
+        } else {
+            builder.append("   h    g    f   e    d    c    b    a"); // Reverse order for black
+        }
+        builder.append(EscapeSequences.RESET_TEXT_COLOR)
+                .append("\n");
     }
 
     private static String getPieceSymbol(ChessPiece piece) {

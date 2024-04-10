@@ -6,6 +6,7 @@ import model.AuthData;
 import model.GameData;
 import model.GamePlayerData;
 import model.UserData;
+import server.websocket.WebSocketHandler;
 import service.*;
 import spark.*;
 import model.GameList;
@@ -13,6 +14,7 @@ import model.GameList;
 public class Server {
     GameService gameService;
     UserService userService;
+    private final WebSocketHandler webSocketHandler;
 
 
     public Server() {
@@ -24,12 +26,15 @@ public class Server {
         }
         gameService = new GameService(dataAccess);
         userService = new UserService(dataAccess);
+        webSocketHandler = new WebSocketHandler();
     }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/connect", webSocketHandler);
 
 
         //registering the handlers

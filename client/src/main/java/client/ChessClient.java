@@ -3,6 +3,7 @@ package client;
 
 import chess.ChessGame;
 import client.WebSocket.NotificationHandler;
+import client.WebSocket.WebSocketFacade;
 import model.GamePlayerData;
 import exception.ResponseException;
 import model.AuthData;
@@ -19,19 +20,21 @@ import static java.lang.Integer.parseInt;
 public class ChessClient {
     private final ServerFacade serverFacade;
     private boolean isLoggedIn = false;
-
     GameList currList;
-
-    PrintBoard boardPrinter;
-
+    private final NotificationHandler notificationHandler;
+    private final String serverUrl;
+    private WebSocketFacade ws;
     private boolean inGame = false;
     private String username;
-
+    private int gameID;
     private AuthData playerAuth;
 
     public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         this.serverFacade = new ServerFacade(serverUrl);
         this.playerAuth = new AuthData(null,null);
+        this.notificationHandler = notificationHandler;
+        this.serverUrl = serverUrl;
+        this.gameID = -1;
     }
 
     public String eval(String input) {
@@ -42,19 +45,54 @@ public class ChessClient {
 
         String command = tokens[0].toLowerCase();
         try {
-            return switch (command) {
-                case "register" -> register(tokens);
-                case "login" -> login(tokens);
-                case "logout"-> logout();
-                case "create" -> createGame(tokens);
-                case "join" -> joinGame(tokens);
-                case "list" -> listGames(tokens);
-                case "quit" ->"quit";
-                default -> help();
-            };
+            if (!inGame) {
+                return switch (command) {
+                    case "register" -> register(tokens);
+                    case "login" -> login(tokens);
+                    case "logout" -> logout();
+                    case "create" -> createGame(tokens);
+                    case "join" -> joinGame(tokens);
+                    case "list" -> listGames(tokens);
+                    case "quit" -> "quit";
+                    default -> help();
+                };
+            }
+            else {
+                return switch (command) {
+                    case "redraw" -> redrawBoard();
+                    case "leave" -> leaveGame();
+                    case "move" -> makeMove(tokens);
+                    case "resign" -> resign();
+                    case "highlight" -> highlightMoves();
+                    default -> help() ;
+                };
+            }
         } catch (Exception e) {
             return "Error processing command: " + e.getMessage();
         }
+    }
+
+    private String leaveGame() throws ResponseException {
+        ws.leaveGame(username, playerAuth.authToken(), gameID);
+        gameID = -1;
+        ws = null;
+        return null;
+    }
+
+    private String redrawBoard() {
+        return null;
+    }
+
+    private String makeMove(String[] tokens) {
+        return null;
+    }
+
+    private String resign() {
+        return null;
+    }
+
+    private String highlightMoves() {
+        return null;
     }
 
     private String register(String[] tokens) {
@@ -117,11 +155,17 @@ public class ChessClient {
                 return "Please login first.";
             }
             inGame = true;
-            int gameId = currList.getIdFromIndex(parseInt(tokens[2]));
-            GamePlayerData gameData = new GamePlayerData(tokens[1], gameId);
+            gameID = currList.getIdFromIndex(parseInt(tokens[2]));
+            GamePlayerData gameData = new GamePlayerData(tokens[1], gameID);
             serverFacade.joinGame(gameData, playerAuth.authToken());
-            ChessGame game = (ChessGame) currList.getGameFromIndex(parseInt(tokens[2]));
-            PrintBoard.printGameBoard(game.getBoard());
+            ws = new WebSocketFacade(serverUrl, notificationHandler);
+            if (tokens[1].equals("WHITE") || tokens[1].equals("BLACK")) {
+                ws.joinGamePlayer(username, playerAuth.authToken(), tokens[1], gameID);
+            }
+            else {
+                ws.joinGameObserver(username, playerAuth.authToken(), gameID);
+            }
+            this.inGame = true;
             return "Joined game successfully.";
         } catch (IOException | ResponseException e) {
             return "Game Join failed: " + e.getMessage();
@@ -141,6 +185,16 @@ public class ChessClient {
     }
 
     public String help() {
+        if (inGame) {
+            return """
+                    Here are your options
+                    Redraw
+                    Leave
+                    Move <old spot> <new spot>
+                    Resign
+                    Highlight
+                    """;
+        }
         if (!isLoggedIn) {
             return """
                     Here are your options
@@ -153,7 +207,7 @@ public class ChessClient {
                 Here are your options
                 - List
                 - Logout
-                - Join <Color> <GameNumber>
+                - Join <Color (null if observer)> <GameNumber>
                 - Create <GameName>
                 """;
     }

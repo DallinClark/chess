@@ -1,10 +1,9 @@
 package client.WebSocket;
 
-import client.WebSocket.NotificationHandler;
 import com.google.gson.Gson;
 import exception.ResponseException;
-import webSocketMessages.Action;
-import webSocketMessages.Notification;
+import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.UserGameCommand;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -31,8 +30,8 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    Notification notification = new Gson().fromJson(message, Notification.class);
-                    notificationHandler.notify(notification);
+                    ServerMessage newMessage = new Gson().fromJson(message, ServerMessage.class);
+                    notificationHandler.notify(newMessage);
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -45,18 +44,27 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void enterChess(String visitorName) throws ResponseException {
+    public void joinGamePlayer(String username, String authToken, String color, int gameID) throws ResponseException {
         try {
-            var action = new Action(Action.Type.ENTER, visitorName);
+            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.JOIN_PLAYER, color, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }
 
-    public void leaveChess(String visitorName) throws ResponseException {
+    public void joinGameObserver(String username, String authToken, int gameID) throws ResponseException {
         try {
-            var action = new Action(Action.Type.EXIT, visitorName);
+            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.JOIN_OBSERVER, null, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void leaveGame(String username, String authToken,int gameID) throws ResponseException {
+        try {
+            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.LEAVE, null, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
             this.session.close();
         } catch (IOException ex) {
