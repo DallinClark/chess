@@ -17,16 +17,8 @@ public class UserGameCommand {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public CommandType getType() {
         return commandType;
-    }
-
-    public void setType(CommandType type) {
-        this.commandType = type;
     }
 
     public String getMessage() {
@@ -35,10 +27,6 @@ public class UserGameCommand {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public void setCommandType(CommandType type) {
-        this.commandType = type;
     }
 
     public UserGameCommand(String authToken, String username, CommandType type, String message, int gameID) {
@@ -106,10 +94,6 @@ public class UserGameCommand {
 
     public ChessMove getMove() {
         return move;
-    }
-
-    public void setMove(ChessMove move) {
-        this.move = move;
     }
 
     public String newMove;

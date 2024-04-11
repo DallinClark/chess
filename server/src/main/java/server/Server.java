@@ -70,7 +70,7 @@ public class Server {
             res.status(200);
             return new Gson().toJson(registeredUser);
         } catch (DataAccessException ex) {
-            res.status(ex.StatusCode());
+            res.status(ex.statusCode());
             return new Gson().toJson(new ErrorResponse(ex.getMessage()));
         }
 
@@ -82,7 +82,7 @@ public class Server {
             AuthData authToken = userService.login(user);
             return new Gson().toJson(authToken);
         } catch (DataAccessException ex) {
-            res.status(ex.StatusCode());
+            res.status(ex.statusCode());
             return new Gson().toJson(new ErrorResponse(ex.getMessage()));
         }
     }
@@ -94,7 +94,7 @@ public class Server {
             res.status(200);
             return "";
         } catch (DataAccessException ex) {
-            res.status(ex.StatusCode());
+            res.status(ex.statusCode());
             return new Gson().toJson(new ErrorResponse(ex.getMessage()));
 
         }
@@ -110,7 +110,7 @@ public class Server {
             res.status(200);
             return new Gson().toJson(newGame);
         } catch (DataAccessException ex) {
-            res.status(ex.StatusCode());
+            res.status(ex.statusCode());
             return new Gson().toJson(new ErrorResponse(ex.getMessage()));
 
         }
@@ -124,7 +124,7 @@ public class Server {
             res.status(200);
             return "";
         } catch (DataAccessException ex) {
-            res.status(ex.StatusCode());
+            res.status(ex.statusCode());
             return new Gson().toJson(new ErrorResponse(ex.getMessage()));
 
         }
@@ -139,7 +139,7 @@ public class Server {
             res.status(200);
             return new Gson().toJson(games);
         } catch (DataAccessException ex) {
-            res.status(ex.StatusCode());
+            res.status(ex.statusCode());
             return new Gson().toJson(new ErrorResponse(ex.getMessage()));
 
         }
@@ -150,13 +150,13 @@ public class Server {
             res.status(200);
             return "";
         } catch (DataAccessException ex) {
-            res.status(ex.StatusCode());
+            res.status(ex.statusCode());
             return new Gson().toJson(new ErrorResponse(ex.getMessage()));
 
         }
     }
     private void exceptionHandler(DataAccessException ex, Request req, Response res) {
-        res.status(ex.StatusCode());
+        res.status(ex.statusCode());
     }
 
     class ErrorResponse {

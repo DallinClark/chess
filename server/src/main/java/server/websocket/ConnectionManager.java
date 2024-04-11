@@ -22,9 +22,6 @@ public class ConnectionManager {
         return gameState;
     }
 
-    public void setGameState(ChessGame gameState) {
-        this.gameState = gameState;
-    }
 
     public boolean isGameOver() {
         return gameOver;

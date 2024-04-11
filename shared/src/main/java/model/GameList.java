@@ -20,9 +20,6 @@ public record GameList(GameData[] games) {
     public int getIdFromIndex(int index) {
         return games[index - 1].getGameID();
     }
-    public Object getGameFromIndex(int index) {
-        return games[index - 1].getGame();
-    }
     public GameData[] getGames() {
         return games;
     }

@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @WebSocket
 public class WebSocketHandler {
 
-    public final ConcurrentHashMap<Integer, ConnectionManager> ConnectionManagers = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Integer, ConnectionManager> connectionManagers = new ConcurrentHashMap<>();
     private DataAccess dataAccess;
     private boolean isWatcher;
 
@@ -51,23 +51,23 @@ public class WebSocketHandler {
         int col = Character.toUpperCase(position.charAt(0)) - 'A' + 1;
         int row = Character.getNumericValue(position.charAt(1));
         ChessPosition highlightPosition = new ChessPosition(row, col);
-        ConnectionManagers.get(gameID).highlightMoves(authToken, highlightPosition);
+        connectionManagers.get(gameID).highlightMoves(authToken, highlightPosition);
     }
 
 
     private void resign(int gameId, String authToken, ChessGame.TeamColor color) throws IOException, DataAccessException {
         try {
-            if (ConnectionManagers.get(gameId).isGameOver()) {
+            if (connectionManagers.get(gameId).isGameOver()) {
                 var notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
                 notification.setErrorMessage("The game is over");
-                ConnectionManagers.get(gameId).singleBroadcast(authToken, notification);
+                connectionManagers.get(gameId).singleBroadcast(authToken, notification);
                 return;
             }
             String username = dataAccess.userFromAuth(authToken);
-            if (ConnectionManagers.get(gameId).isWatcher(authToken)) {
+            if (connectionManagers.get(gameId).isWatcher(authToken)) {
                 var notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
                 notification.setErrorMessage("You're an observer :(");
-                ConnectionManagers.get(gameId).singleBroadcast(authToken, notification);
+                connectionManagers.get(gameId).singleBroadcast(authToken, notification);
                 return;
             }
             var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
@@ -76,12 +76,12 @@ public class WebSocketHandler {
             } else {
                 notification.setMessage(String.format("%s resigned, %s wins!", username, color.toString()));
             }
-            ConnectionManagers.get(gameId).broadcast(null, notification);
+            connectionManagers.get(gameId).broadcast(null, notification);
             endGame(gameId);
         } catch (DataAccessException e){
             var notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
             notification.setErrorMessage("You're an observer :(");
-            ConnectionManagers.get(gameId).singleBroadcast(authToken, notification);
+            connectionManagers.get(gameId).singleBroadcast(authToken, notification);
         }
     }
     private void makeMove(int gameId, ChessGame.TeamColor color, String oldMove, String newMove, String promotionPiece, String username, String authToken, ChessMove tryMove) throws IOException {
@@ -93,66 +93,66 @@ public class WebSocketHandler {
             else {
                 move = createMove(oldMove, newMove, promotionPiece);
             }
-            if (ConnectionManagers.get(gameId).checkColor(color)) {
+            if (connectionManagers.get(gameId).checkColor(color)) {
                 var notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
                 notification.setErrorMessage("Not your turn");
-                ConnectionManagers.get(gameId).singleBroadcast(authToken, notification);
+                connectionManagers.get(gameId).singleBroadcast(authToken, notification);
                 return;
             }
-            if (ConnectionManagers.get(gameId).checkTurn() !=  dataAccess.getUserColorFromAuthToken(authToken, gameId)) {
+            if (connectionManagers.get(gameId).checkTurn() !=  dataAccess.getUserColorFromAuthToken(authToken, gameId)) {
                 var notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
                 notification.setErrorMessage("Not your turn");
-                ConnectionManagers.get(gameId).singleBroadcast(authToken, notification);
+                connectionManagers.get(gameId).singleBroadcast(authToken, notification);
                 return;
             }
             dataAccess.isWatcher(username, gameId);
-            if (!ConnectionManagers.get(gameId).makeMove(move, authToken)) {
+            if (!connectionManagers.get(gameId).makeMove(move, authToken)) {
                 return;
             }
             var gameNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-            gameNotification.setGame(ConnectionManagers.get(gameId).getGameState());
-            ConnectionManagers.get(gameId).broadcast(null, gameNotification);
+            gameNotification.setGame(connectionManagers.get(gameId).getGameState());
+            connectionManagers.get(gameId).broadcast(null, gameNotification);
             var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
             notification.setMessage(String.format("%s made the move %s to %s", username, oldMove, newMove));
-            ConnectionManagers.get(gameId).broadcast(authToken, notification);
+            connectionManagers.get(gameId).broadcast(authToken, notification);
         } catch(InvalidMoveException exception) {
             if (exception.getMessage().equals("Invalid Move")) {
                 var notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
                 notification.setErrorMessage("Invalid move");
-                ConnectionManagers.get(gameId).singleBroadcast(authToken, notification);
+                connectionManagers.get(gameId).singleBroadcast(authToken, notification);
             }
             else {
                 var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
                 notification.setMessage(String.format("%s made the move %s to %s", username, oldMove, newMove));
-                ConnectionManagers.get(gameId).broadcast(null, notification);
+                connectionManagers.get(gameId).broadcast(null, notification);
                 var gameNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-                gameNotification.setGame(ConnectionManagers.get(gameId).getGameState());
-                ConnectionManagers.get(gameId).broadcast(null, gameNotification);
+                gameNotification.setGame(connectionManagers.get(gameId).getGameState());
+                connectionManagers.get(gameId).broadcast(null, gameNotification);
                 var overNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
                 overNotification.setMessage(exception.getMessage());
-                ConnectionManagers.get(gameId).broadcast(null, overNotification);
+                connectionManagers.get(gameId).broadcast(null, overNotification);
                 endGame(gameId);
             }
         } catch (DataAccessException e) {
             var notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
             notification.setErrorMessage("You are an observer :(");
-            ConnectionManagers.get(gameId).singleBroadcast(authToken, notification);
+            connectionManagers.get(gameId).singleBroadcast(authToken, notification);
         }
 
     }
     private void redraw(int gameID, String authToken, String color) throws IOException {
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-        notification.setGame(ConnectionManagers.get(gameID).getGameState());
+        notification.setGame(connectionManagers.get(gameID).getGameState());
         notification.setColor(color);
-        ConnectionManagers.get(gameID).singleBroadcast(authToken, notification);
+        connectionManagers.get(gameID).singleBroadcast(authToken, notification);
     }
     private void joinObserver(String authToken, String username, Session session, int gameID, ChessGame.TeamColor color) throws IOException {
         try {
-            if (ConnectionManagers.get(gameID) != null) {
-                ConnectionManagers.get(gameID).add(authToken, session);
+            if (connectionManagers.get(gameID) != null) {
+                connectionManagers.get(gameID).add(authToken, session);
             } else {
-                ConnectionManagers.put(gameID, new ConnectionManager(new ChessGame()));
-                ConnectionManagers.get(gameID).add(authToken, session);
+                connectionManagers.put(gameID, new ConnectionManager(new ChessGame()));
+                connectionManagers.get(gameID).add(authToken, session);
             }
             dataAccess.authorize(authToken);
             if (username == null) {
@@ -161,24 +161,24 @@ public class WebSocketHandler {
             dataAccess.isWatcher(username, gameID);
             var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
             notification.setMessage(String.format("%s joined the game as an observer", username));
-            ConnectionManagers.get(gameID).broadcast(authToken, notification);
+            connectionManagers.get(gameID).broadcast(authToken, notification);
             var gameNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-            gameNotification.setGame(ConnectionManagers.get(gameID).getGameState());
-            ConnectionManagers.get(gameID).singleBroadcast(authToken, gameNotification);
-            ConnectionManagers.get(gameID).setWatcher(authToken);
+            gameNotification.setGame(connectionManagers.get(gameID).getGameState());
+            connectionManagers.get(gameID).singleBroadcast(authToken, gameNotification);
+            connectionManagers.get(gameID).setWatcher(authToken);
         } catch (DataAccessException e) {
         var errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
         errorNotification.setErrorMessage(e.getMessage());
-        ConnectionManagers.get(gameID).singleBroadcast(authToken, errorNotification);
+        connectionManagers.get(gameID).singleBroadcast(authToken, errorNotification);
     }
     }
     private void joinPlayer(String authToken, String username, ChessGame.TeamColor color, Session session, int gameID) throws IOException {
         try {
-            if (ConnectionManagers.get(gameID) != null) {
-                ConnectionManagers.get(gameID).add(authToken, session);
+            if (connectionManagers.get(gameID) != null) {
+                connectionManagers.get(gameID).add(authToken, session);
             } else {
-                ConnectionManagers.put(gameID, new ConnectionManager(new ChessGame()));
-                ConnectionManagers.get(gameID).add(authToken, session);
+                connectionManagers.put(gameID, new ConnectionManager(new ChessGame()));
+                connectionManagers.get(gameID).add(authToken, session);
             }
             dataAccess.authorize(authToken);
             if (username == null) {
@@ -187,24 +187,24 @@ public class WebSocketHandler {
             dataAccess.checkGame(gameID, username, color);
             var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
             notification.setMessage(String.format("%s joined the game as %s", username, color));
-            ConnectionManagers.get(gameID).broadcast(authToken, notification);
+            connectionManagers.get(gameID).broadcast(authToken, notification);
             var gameNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
             gameNotification.setGame(ConnectionManagers.get(gameID).getGameState());
             gameNotification.setColor(null); //TODO fix this
-            ConnectionManagers.get(gameID).singleBroadcast(authToken, gameNotification);
+            connectionManagers.get(gameID).singleBroadcast(authToken, gameNotification);
         } catch (DataAccessException e) {
             var errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
             errorNotification.setErrorMessage(e.getMessage());
-            ConnectionManagers.get(gameID).singleBroadcast(authToken, errorNotification);
+            connectionManagers.get(gameID).singleBroadcast(authToken, errorNotification);
         }
     }
 
 
     private void leaveGame(String authToken, String username, Session session, int gameID, String player) throws IOException {
-        ConnectionManagers.get(gameID).remove(authToken);
+        connectionManagers.get(gameID).remove(authToken);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
         if (player == null) {
-            if (ConnectionManagers.get(gameID).isWatcher(authToken)) {
+            if (connectionManagers.get(gameID).isWatcher(authToken)) {
                 notification.setMessage(String.format("%s stopped spectating", username));
             }
             else {
@@ -219,11 +219,11 @@ public class WebSocketHandler {
         else {
             notification.setMessage(String.format("%s stopped spectating", username));
         }
-        ConnectionManagers.get(gameID).broadcast(authToken, notification);
+        connectionManagers.get(gameID).broadcast(authToken, notification);
     }
 
     private void endGame(int gameID) {
-        ConnectionManagers.get(gameID).setGameOver(true);
+        connectionManagers.get(gameID).setGameOver(true);
     }
 
     private ChessMove createMove(String oldMove, String newMove, String promotionPiece)  {

@@ -18,11 +18,9 @@ import java.sql.Connection;
 
 public class SqlDataAccess implements DataAccess {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
     public SqlDataAccess() throws DataAccessException {
         configureDatabase();
     }
-
     @Override
     public void checkUsername(String username) throws DataAccessException {
 
@@ -41,11 +39,9 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Unable to access data: %s", e.getMessage()));
         }
     }
-
     @Override
     public void checkGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException {
         String myColor = color == ChessGame.TeamColor.WHITE ? "WHITE" : "BLACK";
-
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID FROM GameData WHERE gameID = ? AND (whiteUsername = ? OR blackUsername = ?)";
             try (var ps = conn.prepareStatement(statement)) {
@@ -81,8 +77,6 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Unable to access data: %s", e.getMessage()));
         }
     }
-
-
     @Override
     public void createUser(UserData user) throws DataAccessException {
         if (user.password() == null || user.username() == null || user.email() == null) {
@@ -114,7 +108,6 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
     }
-
     @Override
     public AuthData createAuth(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
@@ -126,11 +119,8 @@ public class SqlDataAccess implements DataAccess {
                         // User does not exist
                         throw new DataAccessException(400, "Error: bad request");
                     }
-                    // If we reach here, the user exists, so we proceed to create an auth token.
                 }
             }
-
-            // Generate a new UUID for the authToken
             UUID uuid = UUID.randomUUID();
             String authToken = uuid.toString();
 
@@ -145,8 +135,6 @@ public class SqlDataAccess implements DataAccess {
                     throw new DataAccessException(500, "Error: Creating auth token failed, no rows affected.");
                 }
             }
-
-            // Return the new AuthData object
             return new AuthData(authToken, username);
 
         } catch (SQLException e) {
@@ -154,7 +142,6 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
     }
-
     @Override
     public void checkUser(UserData user) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
@@ -185,7 +172,6 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
     }
-
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
@@ -209,7 +195,6 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
     }
-
     @Override
     public void authorize(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
@@ -217,36 +202,27 @@ public class SqlDataAccess implements DataAccess {
             var statement = "SELECT 1 FROM AuthData WHERE authToken = ?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
-
                 // Execute the query
                 try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        // If the query finds a record, it means the authToken is valid
-                        return;
-                    } else {
-                        // If no record is found, throw an exception indicating unauthorized access
+                    if (!rs.next()) {
                         throw new DataAccessException(401, "Error: unauthorized");
                     }
                 }
             }
         } catch (SQLException e) {
-            // Handle potential SQLException
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
     }
-
     @Override
     public int createGame(String gameName) throws DataAccessException {
         int gameID = -1; // Initialize gameID to an invalid value to indicate failure
         try {
-            // Initialize the new GameData object
             GameData newGame = new GameData();
             newGame.setGameName(gameName);
             // Assuming setGameID() is not necessary here as the DB will auto-generate it
             newGame.setGame(new ChessGame()); // Set a new ChessGame instance
             newGame.setBlackUsername(null); // Assuming null is intended for games without assigned players yet
             newGame.setWhiteUsername(null);
-
             // Serialize newGame to JSON
             Gson gson = new Gson();
             String gameJson = gson.toJson(newGame.getGame());
@@ -282,20 +258,17 @@ public class SqlDataAccess implements DataAccess {
         }
         return gameID;
     }
-
     public ChessGame.TeamColor getUserColorFromAuthToken(String authToken, int gameID) throws DataAccessException {
         // Fetch the username associated with the authToken
         String username = userFromAuth(authToken);
         if (username == null || username.isEmpty()) {
             throw new DataAccessException(401, "Error: Unauthorized or invalid token");
         }
-
         // Now, check the user's color in the specified game
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT whiteUsername, blackUsername FROM GameData WHERE gameID = ?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
-
                 try (var rs = ps.executeQuery()) {
                     if (rs.next()) {
                         String whiteUsername = rs.getString("whiteUsername");
@@ -306,11 +279,9 @@ public class SqlDataAccess implements DataAccess {
                         } else if (username.equals(blackUsername)) {
                             return ChessGame.TeamColor.BLACK;
                         } else {
-                            // The user is not playing in this game as white or black
                             throw new DataAccessException(404, "Error: User is not a participant in the specified game");
                         }
                     } else {
-                        // Game not found
                         throw new DataAccessException(404, "Error: Game not found");
                     }
                 }
@@ -319,9 +290,7 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
     }
-
     public boolean isWatcher(String username, int gameID) throws DataAccessException {
-        // First, check if the gameID exists
         boolean gameExists = false;
         try (var conn = DatabaseManager.getConnection()) {
             var gameExistsQuery = "SELECT 1 FROM GameData WHERE gameID = ?";
@@ -336,13 +305,9 @@ public class SqlDataAccess implements DataAccess {
         } catch (SQLException e) {
             throw new DataAccessException(500, String.format("Database access error checking game existence: %s", e.getMessage()));
         }
-
         if (!gameExists) {
-            // If the game does not exist, there's no need to proceed further
             throw new DataAccessException(404, "Error: Game not found");
         }
-
-        // Proceed to check if the user is a watcher of the game
         try (var conn = DatabaseManager.getConnection()) {
             var watcherQuery = "SELECT 1 FROM GameWatchers WHERE gameID = ? AND username = ?";
             try (var ps = conn.prepareStatement(watcherQuery)) {
@@ -356,8 +321,6 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Database access error checking watcher: %s", e.getMessage()));
         }
     }
-
-
     public void addWatcher(int gameID, String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "INSERT INTO GameWatchers (gameID, username) VALUES (?, ?)";
@@ -370,16 +333,12 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, "Database access error: " + e.getMessage());
         }
     }
-
     @Override
     public void joinGame(GamePlayerData game, String authToken) throws DataAccessException {
         // Fetch the username associated with the authToken
         String username = this.userFromAuth(authToken);
-
-
         try (var conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
-
             // Check the current state of the game
             var statement = "SELECT whiteUsername, blackUsername FROM GameData WHERE gameID = ?";
             try (var ps = conn.prepareStatement(statement)) {
@@ -391,7 +350,6 @@ public class SqlDataAccess implements DataAccess {
                     if (game.playerColor() == null || game.playerColor().isEmpty()) {
                         addWatcher(game.gameID(), authToken);
                     }
-
                     String whiteUsername = rs.getString("whiteUsername");
                     String blackUsername = rs.getString("blackUsername");
 
@@ -403,7 +361,6 @@ public class SqlDataAccess implements DataAccess {
                         // If the requested color is already taken or an invalid color was provided
                         conn.rollback(); // Roll back to maintain consistent state
                     }
-
                     conn.commit(); // Commit the transaction
                 }
             }
@@ -411,7 +368,6 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
     }
-
     private void updatePlayerColor(Connection conn, int gameID, String colorColumn, String username) throws SQLException {
         var updateStatement = "UPDATE GameData SET " + colorColumn + " = ? WHERE gameID = ?";
         try (var ps = conn.prepareStatement(updateStatement)) {
@@ -420,7 +376,6 @@ public class SqlDataAccess implements DataAccess {
             ps.executeUpdate();
         }
     }
-
     @Override
     public String userFromAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
@@ -431,20 +386,16 @@ public class SqlDataAccess implements DataAccess {
 
                 try (var rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        // If a record is found, return the username
                         return rs.getString("username");
                     } else {
-                        // If no record is found, throw an exception indicating unauthorized access
                         throw new DataAccessException(401, "Error: unauthorized");
                     }
                 }
             }
         } catch (SQLException e) {
-            // Handle potential SQLException
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
     }
-
     @Override
     public GameData[] listGames() throws DataAccessException {
         List<GameData> gameList = new ArrayList<>();
@@ -465,7 +416,6 @@ public class SqlDataAccess implements DataAccess {
                         String json = rs.getString("json");
                         ChessGame chessGame = gson.fromJson(json, ChessGame.class);
                         game.setGame(chessGame);
-
                         gameList.add(game);
                     }
                 }
@@ -474,55 +424,27 @@ public class SqlDataAccess implements DataAccess {
             // Handle potential SQLExceptions
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
-
-        // Convert the list to an array and return it
         return gameList.toArray(new GameData[0]);
     }
-
-
     @Override
     public void clear() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            // Disable foreign key checks if your database enforces referential integrity and you encounter constraints errors
-            // This is MySQL-specific; adjust accordingly for other databases
-            // var disableFkChecks = "SET FOREIGN_KEY_CHECKS = 0";
-            // conn.prepareStatement(disableFkChecks).execute();
-
             // Clear the Users table
             var clearUsers = "DELETE FROM UserData";
             conn.prepareStatement(clearUsers).executeUpdate();
-
             // Clear the Games table
             var clearGames = "DELETE FROM GameData";
             conn.prepareStatement(clearGames).executeUpdate();
-
             // Clear the AuthData table
             var clearTokens = "DELETE FROM AuthData";
             conn.prepareStatement(clearTokens).executeUpdate();
-
-            // Re-enable foreign key checks if they were disabled
-            // var enableFkChecks = "SET FOREIGN_KEY_CHECKS = 1";
-            // conn.prepareStatement(enableFkChecks).execute();
-
-            // Reset auto-increment values if necessary (highly database-specific, shown here for MySQL)
-            // var resetUsersAutoIncrement = "ALTER TABLE Users AUTO_INCREMENT = 1";
-            // conn.prepareStatement(resetUsersAutoIncrement).executeUpdate();
-            // var resetGamesAutoIncrement = "ALTER TABLE Games AUTO_INCREMENT = 1";
-            // conn.prepareStatement(resetGamesAutoIncrement).executeUpdate();
-            // var resetAuthDataAutoIncrement = "ALTER TABLE AuthData AUTO_INCREMENT = 1";
-            // conn.prepareStatement(resetAuthDataAutoIncrement).executeUpdate();
-
         } catch (SQLException e) {
-            // Handle potential SQLExceptions
             throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
         }
     }
-
     private String hashPassword(String rawPassword) {
         return encoder.encode(rawPassword);
     }
-
-
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  AuthData (
@@ -557,15 +479,9 @@ public class SqlDataAccess implements DataAccess {
             );
             """
     };
-
-
     private void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
-
         try (var conn = DatabaseManager.getConnection()) {
-
-
-
             // Recreate tables if they do not exist
             for (String stmt : createStatements) {
                 try (var preparedStatement = conn.prepareStatement(stmt)) {
@@ -576,7 +492,4 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException(500, String.format("Unable to configure database: %s", ex.getMessage()));
         }
     }
-
-
-
 }
