@@ -189,7 +189,7 @@ public class WebSocketHandler {
             notification.setMessage(String.format("%s joined the game as %s", username, color));
             connectionManagers.get(gameID).broadcast(authToken, notification);
             var gameNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-            gameNotification.setGame(ConnectionManagers.get(gameID).getGameState());
+            gameNotification.setGame(connectionManagers.get(gameID).getGameState());
             gameNotification.setColor(null); //TODO fix this
             connectionManagers.get(gameID).singleBroadcast(authToken, gameNotification);
         } catch (DataAccessException e) {
