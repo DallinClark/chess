@@ -43,6 +43,47 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
+    public void checkGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException {
+        String myColor = color == ChessGame.TeamColor.WHITE ? "WHITE" : "BLACK";
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID FROM GameData WHERE gameID = ? AND (whiteUsername = ? OR blackUsername = ?)";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                ps.setString(2, username);
+                ps.setString(3, username);
+
+                try (var rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new DataAccessException(404, "Error: Game not found or player not part of the game");
+                    } else {
+                        // Game and player found, now check if the player's color matches
+                        var colorCheckStmt = "SELECT gameID FROM GameData WHERE gameID = ? AND ((whiteUsername = ? AND 'WHITE' = ?) OR (blackUsername = ? AND 'BLACK' = ?))";
+                        try (var colorPs = conn.prepareStatement(colorCheckStmt)) {
+                            colorPs.setInt(1, gameID);
+                            colorPs.setString(2, username);
+                            colorPs.setString(3, myColor);
+                            colorPs.setString(4, username);
+                            colorPs.setString(5, myColor);
+
+                            try (var colorRs = colorPs.executeQuery()) {
+                                if (!colorRs.next()) {
+                                    // The player exists but not as the specified color
+                                    throw new DataAccessException(400, "Error: Player does not match the specified color in the game");
+                                }
+                                // If we get here, everything checks out
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException(500, String.format("Unable to access data: %s", e.getMessage()));
+        }
+    }
+
+
+    @Override
     public void createUser(UserData user) throws DataAccessException {
         if (user.password() == null || user.username() == null || user.email() == null) {
             throw new DataAccessException(400, "Error: bad request");
@@ -242,7 +283,93 @@ public class SqlDataAccess implements DataAccess {
         return gameID;
     }
 
+    public ChessGame.TeamColor getUserColorFromAuthToken(String authToken, int gameID) throws DataAccessException {
+        // Fetch the username associated with the authToken
+        String username = userFromAuth(authToken);
+        if (username == null || username.isEmpty()) {
+            throw new DataAccessException(401, "Error: Unauthorized or invalid token");
+        }
 
+        // Now, check the user's color in the specified game
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT whiteUsername, blackUsername FROM GameData WHERE gameID = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String whiteUsername = rs.getString("whiteUsername");
+                        String blackUsername = rs.getString("blackUsername");
+
+                        if (username.equals(whiteUsername)) {
+                            return ChessGame.TeamColor.WHITE;
+                        } else if (username.equals(blackUsername)) {
+                            return ChessGame.TeamColor.BLACK;
+                        } else {
+                            // The user is not playing in this game as white or black
+                            throw new DataAccessException(404, "Error: User is not a participant in the specified game");
+                        }
+                    } else {
+                        // Game not found
+                        throw new DataAccessException(404, "Error: Game not found");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(500, String.format("Database access error: %s", e.getMessage()));
+        }
+    }
+
+    public boolean isWatcher(String username, int gameID) throws DataAccessException {
+        // First, check if the gameID exists
+        boolean gameExists = false;
+        try (var conn = DatabaseManager.getConnection()) {
+            var gameExistsQuery = "SELECT 1 FROM GameData WHERE gameID = ?";
+            try (var ps = conn.prepareStatement(gameExistsQuery)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        gameExists = true; // Game exists
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(500, String.format("Database access error checking game existence: %s", e.getMessage()));
+        }
+
+        if (!gameExists) {
+            // If the game does not exist, there's no need to proceed further
+            throw new DataAccessException(404, "Error: Game not found");
+        }
+
+        // Proceed to check if the user is a watcher of the game
+        try (var conn = DatabaseManager.getConnection()) {
+            var watcherQuery = "SELECT 1 FROM GameWatchers WHERE gameID = ? AND username = ?";
+            try (var ps = conn.prepareStatement(watcherQuery)) {
+                ps.setInt(1, gameID);
+                ps.setString(2, username);
+                try (var rs = ps.executeQuery()) {
+                    return rs.next(); // User is a watcher if we get a record
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(500, String.format("Database access error checking watcher: %s", e.getMessage()));
+        }
+    }
+
+
+    public void addWatcher(int gameID, String username) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "INSERT INTO GameWatchers (gameID, username) VALUES (?, ?)";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                ps.setString(2, username);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(500, "Database access error: " + e.getMessage());
+        }
+    }
 
     @Override
     public void joinGame(GamePlayerData game, String authToken) throws DataAccessException {
@@ -262,7 +389,7 @@ public class SqlDataAccess implements DataAccess {
                         throw new DataAccessException(400, "Error: bad request");
                     }
                     if (game.playerColor() == null || game.playerColor().isEmpty()) {
-                        return; //TODO add them as watcher
+                        addWatcher(game.gameID(), authToken);
                     }
 
                     String whiteUsername = rs.getString("whiteUsername");
@@ -421,6 +548,13 @@ public class SqlDataAccess implements DataAccess {
                 `email` varchar(256),
                 PRIMARY KEY (`username`)
             ) ;
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS GameWatchers (
+                `gameID` int,
+                `username` varchar(255),
+                PRIMARY KEY (`username`)
+            );
             """
     };
 

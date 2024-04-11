@@ -15,10 +15,10 @@ public class Server {
     GameService gameService;
     UserService userService;
     private final WebSocketHandler webSocketHandler;
+    DataAccess dataAccess = null;
 
 
     public Server() {
-        DataAccess dataAccess = null;
         try {
             dataAccess = new SqlDataAccess();
         } catch (DataAccessException e) {
@@ -26,7 +26,7 @@ public class Server {
         }
         gameService = new GameService(dataAccess);
         userService = new UserService(dataAccess);
-        webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler(dataAccess);
     }
 
     public int run(int desiredPort) {

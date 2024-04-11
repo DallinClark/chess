@@ -1,5 +1,6 @@
 package client.WebSocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -46,16 +47,25 @@ public class WebSocketFacade extends Endpoint {
 
     public void resign(int gameID,String username,String color) throws ResponseException {
         try {
-            var action = new UserGameCommand(null, username, UserGameCommand.CommandType.RESIGN, color, gameID);
+            ChessGame.TeamColor myColor = null;
+            if (color.equals("WHITE")) {
+                myColor = ChessGame.TeamColor.WHITE;
+            }
+            else if (color.equals("BLACK")) {
+                myColor = ChessGame.TeamColor.BLACK;
+            }
+            var action = new UserGameCommand(null, username, UserGameCommand.CommandType.RESIGN, null, gameID);
+            action.setPlayerColor(myColor);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }
 
-    public void makeMove(String oldPos, String newPos, String color, int gameID, String promotionPiece, String username, String authToken) throws ResponseException {
+    public void makeMove(String oldPos, String newPos, ChessGame.TeamColor color, int gameID, String promotionPiece, String username, String authToken) throws ResponseException {
         try {
-            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.MAKE_MOVE, color, gameID);
+            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.MAKE_MOVE, null, gameID);
+            action.setPlayerColor(color);
             action.setOldMove(oldPos);
             action.setNewMove(newPos);
             action.setPromotionPiece(promotionPiece);
@@ -75,9 +85,10 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void joinGamePlayer(String username, String authToken, String color, int gameID) throws ResponseException {
+    public void joinGamePlayer(String username, String authToken, ChessGame.TeamColor color, int gameID) throws ResponseException {
         try {
-            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.JOIN_PLAYER, color, gameID);
+            var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.JOIN_PLAYER, null, gameID);
+            action.setPlayerColor(color);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());

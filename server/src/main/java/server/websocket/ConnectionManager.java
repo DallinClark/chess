@@ -47,14 +47,15 @@ public class ConnectionManager {
     public void remove(String authToken) {
         connections.remove(authToken);
     }
-    public void makeMove(ChessMove move) throws InvalidMoveException, IOException {
+    public boolean makeMove(ChessMove move, String authToken) throws InvalidMoveException, IOException {
         if (gameOver) {
-            var overNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-            overNotification.setMessage("Can't move, game is over");
-            broadcast(null, overNotification);
-            return;
+            var overNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            overNotification.setErrorMessage("Can't move, game is over");
+            singleBroadcast(authToken, overNotification);
+            return false;
         }
         gameState.makeMove(move);
+        return true;
     }
 
     public void broadcast(String excludeToken, ServerMessage message) throws IOException {
@@ -91,5 +92,24 @@ public class ConnectionManager {
         notification.setLegalMoves(moves);
         notification.setGame(gameState);
         singleBroadcast(authToken, notification);
+    }
+
+    public boolean checkColor(ChessGame.TeamColor color) {
+        return gameState.getTeamTurn().equals(color);
+    }
+
+    public ChessGame.TeamColor checkTurn() {
+        return gameState.getTeamTurn();
+    }
+
+    public void setWatcher(String authToken) {
+        connections.get(authToken).setWatcher(true);
+    }
+    public boolean isWatcher(String authToken) {
+        if (connections.containsKey(authToken)) {
+            return connections.get(authToken).isWatcher();
+        } else {
+            return false; // authToken is not a key in the connections map
+        }
     }
 }

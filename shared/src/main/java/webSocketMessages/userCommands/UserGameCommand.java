@@ -1,5 +1,8 @@
 package webSocketMessages.userCommands;
 
+import chess.ChessGame;
+import chess.ChessMove;
+
 import java.util.Objects;
 
 /**
@@ -19,11 +22,11 @@ public class UserGameCommand {
     }
 
     public CommandType getType() {
-        return type;
+        return commandType;
     }
 
     public void setType(CommandType type) {
-        this.type = type;
+        this.commandType = type;
     }
 
     public String getMessage() {
@@ -34,18 +37,19 @@ public class UserGameCommand {
         this.message = message;
     }
 
-    public void setCommandType(CommandType commandType) {
-        this.commandType = commandType;
+    public void setCommandType(CommandType type) {
+        this.commandType = type;
     }
 
     public UserGameCommand(String authToken, String username, CommandType type, String message, int gameID) {
         this.authToken = authToken;
         this.username = username;
-        this.type = type;
+        this.commandType = type;
         this.message = message;
         this.gameID = gameID;
         this.oldMove = null;
         this.newMove = null;
+        this.move = null;
     }
 
     public String getOldMove() {
@@ -79,7 +83,15 @@ public class UserGameCommand {
 
     private final String authToken;
     public String username;
-    public CommandType type;
+    public ChessGame.TeamColor playerColor;
+
+    public ChessGame.TeamColor getPlayerColor() {
+        return playerColor;
+    }
+
+    public void setPlayerColor(ChessGame.TeamColor playerColor) {
+        this.playerColor = playerColor;
+    }
 
     public String getPromotionPiece() {
         return promotionPiece;
@@ -90,6 +102,16 @@ public class UserGameCommand {
     }
 
     public String oldMove;
+    public ChessMove move;
+
+    public ChessMove getMove() {
+        return move;
+    }
+
+    public void setMove(ChessMove move) {
+        this.move = move;
+    }
+
     public String newMove;
     public String promotionPiece;
     public String message;

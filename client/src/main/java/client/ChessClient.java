@@ -89,8 +89,15 @@ public class ChessClient {
     }
 
     private String makeMove(String[] tokens) throws ResponseException {
+        ChessGame.TeamColor myColor = null;
+        if (color.equals("WHITE") ) {
+            myColor = ChessGame.TeamColor.WHITE;
+        }
+        if (tokens[1].equals("BLACK")) {
+            myColor = ChessGame.TeamColor.BLACK;
+        }
         if (isPlayer) {
-            ws.makeMove(tokens[1], tokens[2], color, gameID, tokens[3], username, playerAuth.authToken());
+            ws.makeMove(tokens[1], tokens[2], myColor, gameID, tokens[3], username, playerAuth.authToken());
         }
         else {
             return "\n Can't move, you are not a player";
@@ -170,13 +177,16 @@ public class ChessClient {
             if (!isLoggedIn) {
                 return "Please login first.";
             }
-            inGame = true;
             gameID = currList.getIdFromIndex(parseInt(tokens[2]));
             GamePlayerData gameData = new GamePlayerData(tokens[1], gameID);
             serverFacade.joinGame(gameData, playerAuth.authToken());
             ws = new WebSocketFacade(serverUrl, notificationHandler);
-            if (tokens[1].equals("WHITE") || tokens[1].equals("BLACK")) {
-                ws.joinGamePlayer(username, playerAuth.authToken(), tokens[1], gameID);
+            if (tokens[1].equals("WHITE") ) {
+                ws.joinGamePlayer(username, playerAuth.authToken(), ChessGame.TeamColor.WHITE, gameID);
+                isPlayer = true;
+            }
+            if (tokens[1].equals("BLACK")) {
+                ws.joinGamePlayer(username, playerAuth.authToken(), ChessGame.TeamColor.BLACK, gameID);
                 isPlayer = true;
             }
             else {

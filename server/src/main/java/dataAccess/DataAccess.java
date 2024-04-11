@@ -1,5 +1,6 @@
 package dataAccess;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.GamePlayerData;
@@ -7,10 +8,15 @@ import model.UserData;
 
 public interface DataAccess {
     void checkUsername(String username) throws DataAccessException;
+    void checkGame(int gameID, String username, ChessGame.TeamColor color) throws DataAccessException;
+
+    public boolean isWatcher(String username, int gameID) throws DataAccessException;
 
     void createUser(UserData user) throws DataAccessException;
+    public ChessGame.TeamColor getUserColorFromAuthToken(String authToken, int gameID) throws DataAccessException;
 
     AuthData createAuth(String username) throws DataAccessException;
+    public void addWatcher(int gameID, String username) throws DataAccessException;
 
     void checkUser(UserData user) throws DataAccessException;
 
