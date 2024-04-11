@@ -26,9 +26,31 @@ public class WebSocketHandler {
             case LEAVE -> leaveGame(command.getAuthString(), command.getUsername(), session, command.gameID, command.getMessage());
             case REDRAW -> redraw(command.gameID, command.getAuthString(), command.getMessage());
             case MAKE_MOVE -> makeMove(command.gameID, command.getMessage(), command.getOldMove(), command.getNewMove(), command.getPromotionPiece(), command.getUsername(), command.getAuthString());
+            case RESIGN -> resign(command.gameID, command.getMessage(),command.getUsername());
+            case HIGHLIGHT -> highlight(command.gameID, command.getAuthString(), command.getMessage());
         }
     }
 
+    private void highlight(int gameID, String authToken, String position) throws IOException {
+        int col = Character.toUpperCase(position.charAt(0)) - 'A' + 1;
+        int row = Character.getNumericValue(position.charAt(1));
+        ChessPosition highlightPosition = new ChessPosition(row, col);
+        ConnectionManagers.get(gameID).highlightMoves(authToken, highlightPosition);
+    }
+
+
+    private void resign(int gameId, String color, String username) throws IOException {
+        if (color.equals("WHITE")) {
+            color = "BLACK";
+        }
+        else {
+            color = "WHITE";
+        }
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        notification.setMessage(String.format("%s resigned, %s wins!",username, color));
+        ConnectionManagers.get(gameId).broadcast(null, notification);
+        endGame(gameId);
+    }
     private void makeMove(int gameId, String color, String oldMove, String newMove, String promotionPiece, String username, String authToken) throws IOException {
         try {
             ChessMove move = createMove(oldMove, newMove, promotionPiece);
@@ -40,9 +62,23 @@ public class WebSocketHandler {
             gameNotification.setGame(ConnectionManagers.get(gameId).getGameState());
             ConnectionManagers.get(gameId).broadcast(null, gameNotification);
         } catch(InvalidMoveException exception) {
-            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-            notification.setMessage("Invalid move");
-            ConnectionManagers.get(gameId).singleBroadcast(authToken, notification);
+            if (exception.getMessage().equals("Invalid Move")) {
+                var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                notification.setMessage("Invalid move");
+                ConnectionManagers.get(gameId).singleBroadcast(authToken, notification);
+            }
+            else {
+                var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                notification.setMessage(String.format("%s made the move %s to %s", username, oldMove, newMove));
+                ConnectionManagers.get(gameId).broadcast(null, notification);
+                var gameNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+                gameNotification.setGame(ConnectionManagers.get(gameId).getGameState());
+                ConnectionManagers.get(gameId).broadcast(null, gameNotification);
+                var overNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                overNotification.setMessage(exception.getMessage());
+                ConnectionManagers.get(gameId).broadcast(null, overNotification);
+                endGame(gameId);
+            }
         }
 
     }
@@ -99,7 +135,7 @@ public class WebSocketHandler {
     }
 
     private void endGame(int gameID) {
-        ConnectionManagers.get(gameID).setGameOver(false);
+        ConnectionManagers.get(gameID).setGameOver(true);
     }
 
     private ChessMove createMove(String oldMove, String newMove, String promotionPiece)  {

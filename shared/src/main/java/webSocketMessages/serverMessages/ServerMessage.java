@@ -1,7 +1,9 @@
 package webSocketMessages.serverMessages;
 
+import java.util.Collection;
 import java.util.Objects;
 import chess.ChessGame;
+import chess.ChessMove;
 
 /**
  * Represents a Message the server can send through a WebSocket
@@ -40,6 +42,15 @@ public class ServerMessage {
     public ChessGame game;
     public String errorMessage;
     public String color;
+    public Collection<ChessMove> legalMoves;
+
+    public Collection<ChessMove> getLegalMoves() {
+        return legalMoves;
+    }
+
+    public void setLegalMoves(Collection<ChessMove> legalMoves) {
+        this.legalMoves = legalMoves;
+    }
 
     public String getColor() {
         return color;
@@ -52,7 +63,8 @@ public class ServerMessage {
     public enum ServerMessageType {
         LOAD_GAME,
         ERROR,
-        NOTIFICATION
+        NOTIFICATION,
+        LOAD_MOVES
     }
 
     public ServerMessage(ServerMessageType type) {

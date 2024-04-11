@@ -2,6 +2,7 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
@@ -9,6 +10,7 @@ import webSocketMessages.serverMessages.ServerMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
@@ -45,7 +47,13 @@ public class ConnectionManager {
     public void remove(String authToken) {
         connections.remove(authToken);
     }
-    public void makeMove(ChessMove move) throws InvalidMoveException {
+    public void makeMove(ChessMove move) throws InvalidMoveException, IOException {
+        if (gameOver) {
+            var overNotification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+            overNotification.setMessage("Can't move, game is over");
+            broadcast(null, overNotification);
+            return;
+        }
         gameState.makeMove(move);
     }
 
@@ -77,4 +85,11 @@ public class ConnectionManager {
         }
     }
 
+    public void highlightMoves(String authToken, ChessPosition position) throws IOException {
+        Collection<ChessMove> moves = gameState.validMoves(position);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_MOVES);
+        notification.setLegalMoves(moves);
+        notification.setGame(gameState);
+        singleBroadcast(authToken, notification);
+    }
 }

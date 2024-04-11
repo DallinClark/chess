@@ -1,12 +1,11 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import  chess.ChessPiece.PieceType;
 import chess.ChessGame.TeamColor.*;
+
+import java.util.Collection;
 
 public class PrintBoard {
 
@@ -80,6 +79,92 @@ public class PrintBoard {
             default:
                 return EscapeSequences.EMPTY;
         }
+    }
+
+    public static void printGameBoardHighlighted(ChessBoard board, String color, Collection<ChessMove> legalMoves) {
+        StringBuilder builder = new StringBuilder();
+
+        // Determine if the current player is black to decide the order of printing
+        boolean isBlack = "BLACK".equalsIgnoreCase(color);
+
+        // Column labels
+        printColumnLabels(builder, isBlack);
+
+        // Adjust row printing order based on the player's color
+        for (int row = isBlack ? 8 : 1; isBlack ? row >= 1 : row <= 8; row += isBlack ? -1 : 1) {
+            builder.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY)
+                    .append(row)
+                    .append(EscapeSequences.RESET_TEXT_COLOR);
+
+            // Adjust column printing order based on the player's color
+            for (int col = isBlack ? 1 : 8; isBlack ? col <= 8 : col >= 1; col += isBlack ? 1 : -1) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+
+                // Check if the current cell is a legal move end position
+                boolean isLegalMove = legalMoves.stream()
+                        .anyMatch(move -> move.getEndPosition().equals(position));
+
+                // Highlight cell if it's a legal move position
+                if (isLegalMove) {
+                    builder.append(EscapeSequences.SET_BG_COLOR_YELLOW);
+                } else if ((row + col) % 2 == 0) {
+                    builder.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                } else {
+                    builder.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                }
+
+                String pieceSymbol = getPieceSymbol(piece);
+                builder.append(" ").append(pieceSymbol)
+                        .append(EscapeSequences.RESET_BG_COLOR); // Reset background color after each cell
+            }
+            builder.append("\n");
+        }
+
+        System.out.println(builder.toString());
+    }
+
+    public static void printGameBoardHighlghted(ChessBoard board, String color, Collection<ChessMove> legalMoves) {
+        StringBuilder builder = new StringBuilder();
+
+        // Determine if the current player is black to decide the order of printing
+        boolean isBlack = "BLACK".equalsIgnoreCase(color);
+
+        // Column labels
+        printColumnLabels(builder, isBlack);
+
+        // Adjust row printing order based on the player's color
+        for (int row = isBlack ? 8 : 1; isBlack ? row >= 1 : row <= 8; row += isBlack ? -1 : 1) {
+            builder.append(EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY)
+                    .append(row)
+                    .append(EscapeSequences.RESET_TEXT_COLOR);
+
+            // Adjust column printing order based on the player's color
+            for (int col = isBlack ? 1 : 8; isBlack ? col <= 8 : col >= 1; col += isBlack ? 1 : -1) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+
+                // Check if the current cell is a legal move end position
+                boolean isLegalMove = legalMoves.stream()
+                        .anyMatch(move -> move.getEndPosition().equals(position));
+
+                // Highlight cell if it's a legal move position
+                if (isLegalMove) {
+                    builder.append(EscapeSequences.SET_BG_COLOR_YELLOW);
+                } else if ((row + col) % 2 == 0) {
+                    builder.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+                } else {
+                    builder.append(EscapeSequences.SET_BG_COLOR_DARK_GREY);
+                }
+
+                String pieceSymbol = getPieceSymbol(piece);
+                builder.append(" ").append(pieceSymbol)
+                        .append(EscapeSequences.RESET_BG_COLOR); // Reset background color after each cell
+            }
+            builder.append("\n");
+        }
+
+        System.out.println(builder.toString());
     }
 }
 

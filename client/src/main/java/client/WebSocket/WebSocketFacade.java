@@ -44,6 +44,15 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
+    public void resign(int gameID,String username,String color) throws ResponseException {
+        try {
+            var action = new UserGameCommand(null, username, UserGameCommand.CommandType.RESIGN, color, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
     public void makeMove(String oldPos, String newPos, String color, int gameID, String promotionPiece, String username, String authToken) throws ResponseException {
         try {
             var action = new UserGameCommand(authToken, username, UserGameCommand.CommandType.MAKE_MOVE, color, gameID);
@@ -101,4 +110,12 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
+    public void highlight(int gameID, String authToken, String position) throws ResponseException {
+        try {
+            var action = new UserGameCommand(authToken, null, UserGameCommand.CommandType.HIGHLIGHT, position, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
 }

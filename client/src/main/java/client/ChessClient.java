@@ -66,7 +66,7 @@ public class ChessClient {
                     case "leave" -> leaveGame();
                     case "move" -> makeMove(tokens);
                     case "resign" -> resign();
-                    case "highlight" -> highlightMoves();
+                    case "highlight" -> highlightMoves(tokens);
                     default -> help() ;
                 };
             }
@@ -98,12 +98,17 @@ public class ChessClient {
         return "";
     }
 
-    private String resign() {
-        return null;
+    private String resign() throws ResponseException {
+        if (!isPlayer) {
+            return "Can't resign, you aren't a player";
+        }
+        ws.resign(gameID, username, color);
+        return "";
     }
 
-    private String highlightMoves() {
-        return null;
+    private String highlightMoves(String[] tokens) throws ResponseException {
+        ws.highlight(gameID, playerAuth.authToken(), tokens[1]);
+        return "";
     }
 
     private String register(String[] tokens) {
@@ -211,7 +216,7 @@ public class ChessClient {
                     Leave
                     Move <old spot> <new spot> <promotion piece (null if not applicable)>
                     Resign
-                    Highlight
+                    Highlight <piece position>
                     """;
         }
         if (!isLoggedIn) {

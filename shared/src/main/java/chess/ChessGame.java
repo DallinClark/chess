@@ -93,6 +93,19 @@ public class ChessGame {
                 else {
                     teamTurn = TeamColor.WHITE;
                 }
+                if (isInCheckmate(teamTurn)) {
+                    String winner;
+                    if (teamTurn == TeamColor.WHITE) {
+                        winner = "Black";
+                    }
+                    else {
+                        winner = "White";
+                    }
+                    throw new InvalidMoveException("Checkmate! " + winner + " wins!");
+                }
+                if (isInStalemate(teamTurn)) {
+                    throw new InvalidMoveException("Stalemate, game over :(");
+                }
                 return;
             }
         }
